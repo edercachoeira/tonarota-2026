@@ -1,46 +1,110 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  
+  <!-- SEO Meta Tags -->
+  <title>Tô Na Rota — Encontre os Melhores Balneários e Praias</title>
+  <meta name="description" content="Encontre os melhores balneários, quiosques, praias e pontos turísticos da região. Descubra a infraestrutura, rotas e avaliações reais.">
+  <meta name="keywords" content="balneários, praias, quiosques, turismo, rota, viagem, lazer, infraestrutura">
+  <meta name="author" content="Tô Na Rota">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Tô Na Rota — Encontre os Melhores Balneários e Praias">
+  <meta property="og:description" content="Encontre os melhores balneários, quiosques, praias e pontos turísticos da região. Descubra a infraestrutura, rotas e avaliações reais.">
+  <meta property="og:image" content="favicon.png">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:title" content="Tô Na Rota — Encontre os Melhores Balneários e Praias">
+  <meta property="twitter:description" content="Encontre os melhores balneários, quiosques, praias e pontos turísticos da região. Descubra a infraestrutura, rotas e avaliações reais.">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="tonarota_2026">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Tô Na Rota">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>tonarota_2026</title>
   <link rel="manifest" href="manifest.json">
+  
+  <!-- Fontes Modernas -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Estilos da Tela de Carregamento (Splash Screen) -->
+  <style>
+    body {
+      background-color: #0F172A; /* Slate 900 */
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      width: 100vw;
+    }
+    .logo-glow {
+      font-size: 3rem;
+      font-weight: bold;
+      color: #0D9488; /* Teal 600 */
+      text-shadow: 0 0 20px rgba(13, 148, 136, 0.4);
+      margin-bottom: 1rem;
+      animation: pulse 2s infinite ease-in-out;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .subtitle {
+      color: #94A3B8; /* Slate 400 */
+      font-size: 1rem;
+      letter-spacing: 0.15em;
+      margin-bottom: 2rem;
+      text-transform: uppercase;
+    }
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(13, 148, 136, 0.1);
+      border-left-color: #0D9488;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.9; }
+      50% { transform: scale(1.05); opacity: 1; text-shadow: 0 0 30px rgba(13, 148, 136, 0.7); }
+    }
+  </style>
 </head>
 <body>
-  <!--
-    You can customize the "flutter_bootstrap.js" script.
-    This is useful to provide a custom configuration to the Flutter loader
-    or to give the user feedback during the initialization process.
+  <div id="loading" class="loading-container">
+    <div class="logo-glow">🏝️ Tô Na Rota</div>
+    <div class="subtitle">O seu guia de balneários</div>
+    <div class="spinner"></div>
+  </div>
 
-    For more details:
-    * https://docs.flutter.dev/platform-integration/web/initialization
-  -->
+  <script>
+    // Remove o splash screen quando a aplicação Flutter for inicializada
+    window.addEventListener('load', function() {
+      // O script do flutter_bootstrap.js irá gerenciar o carregamento. 
+      // Esta lógica garante que ocultamos o loader após o Flutter inicializar.
+    });
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

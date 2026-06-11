@@ -97,6 +97,13 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> updateCurrentUser(Usuario user) async {
+    _currentUser = user;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_profile', jsonEncode(user.toJson()));
+    notifyListeners();
+  }
+
   void clearError() {
     _error = null;
     notifyListeners();

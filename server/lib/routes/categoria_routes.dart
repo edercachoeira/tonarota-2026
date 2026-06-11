@@ -3,9 +3,11 @@ import 'dart:io';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import '../services/categoria_service.dart';
+import '../services/auditoria_service.dart';
 
 class CategoriaRoutes {
   final CategoriaService _categoriaService = CategoriaService();
+  final AuditoriaService _auditoriaService = AuditoriaService();
 
   Router get router {
     final router = Router();
@@ -62,7 +64,16 @@ class CategoriaRoutes {
           parentId: parentId,
         );
 
-        return Response(HttpStatus.created, body: jsonEncode(categoria.toJson()), headers: {'content-type': 'application/json'});
+        final userId = request.context['user_id'] as String? ?? '';
+        final forwarded = request.headers['x-forwarded-for'] ?? '127.0.0.1';
+        await _auditoriaService.registrarLog(
+          usuarioId: userId,
+          acao: 'CRIAR_CATEGORIA',
+          detalhes: 'Criou a categoria "${categoria.nome}"',
+          ip: forwarded.split(',').first.trim(),
+        );
+
+        return Response.ok(jsonEncode(categoria.toJson()), headers: {'content-type': 'application/json'});
       } catch (e) {
         return Response(HttpStatus.badRequest, body: jsonEncode({'error': e.toString()}), headers: {'content-type': 'application/json'});
       }
@@ -102,6 +113,15 @@ class CategoriaRoutes {
           return Response(HttpStatus.notFound, body: '{"error": "Categoria não encontrada"}', headers: {'content-type': 'application/json'});
         }
 
+        final userId = request.context['user_id'] as String? ?? '';
+        final forwarded = request.headers['x-forwarded-for'] ?? '127.0.0.1';
+        await _auditoriaService.registrarLog(
+          usuarioId: userId,
+          acao: 'EDITAR_CATEGORIA',
+          detalhes: 'Editou a categoria "${updated.nome}"',
+          ip: forwarded.split(',').first.trim(),
+        );
+
         return Response.ok(jsonEncode(updated.toJson()), headers: {'content-type': 'application/json'});
       } catch (e) {
         return Response(HttpStatus.badRequest, body: jsonEncode({'error': e.toString()}), headers: {'content-type': 'application/json'});
@@ -120,6 +140,15 @@ class CategoriaRoutes {
         if (!deleted) {
           return Response(HttpStatus.notFound, body: '{"error": "Categoria não encontrada"}', headers: {'content-type': 'application/json'});
         }
+
+        final userId = request.context['user_id'] as String? ?? '';
+        final forwarded = request.headers['x-forwarded-for'] ?? '127.0.0.1';
+        await _auditoriaService.registrarLog(
+          usuarioId: userId,
+          acao: 'EXCLUIR_CATEGORIA',
+          detalhes: 'Excluiu a categoria de ID: $id',
+          ip: forwarded.split(',').first.trim(),
+        );
 
         return Response.ok('{"message": "Categoria deletada com sucesso"}', headers: {'content-type': 'application/json'});
       } catch (e) {

@@ -11,6 +11,8 @@ import '../lib/routes/auth_routes.dart';
 import '../lib/routes/balneario_routes.dart';
 import '../lib/routes/categoria_routes.dart';
 import '../lib/routes/estabelecimento_routes.dart';
+import '../lib/routes/auditoria_routes.dart';
+import '../lib/routes/produto_routes.dart';
 
 void main(List<String> args) async {
   // Carrega variáveis de ambiente se o arquivo .env existir
@@ -43,11 +45,81 @@ void main(List<String> args) async {
     );
   });
 
+  // Endpoint de Upload de Imagens (envio de bytes brutos em POST)
+  router.post('/api/v1/upload', (Request request) async {
+    try {
+      final contentType = request.headers['content-type'] ?? 'image/jpeg';
+      String ext = '.jpg';
+      if (contentType.contains('png')) ext = '.png';
+      if (contentType.contains('webp')) ext = '.webp';
+
+      final List<int> bytes = [];
+      await for (final chunk in request.read()) {
+        bytes.addAll(chunk);
+      }
+
+      if (bytes.isEmpty) {
+        return Response(HttpStatus.badRequest, body: '{"error": "Nenhum dado enviado"}', headers: {'content-type': 'application/json'});
+      }
+
+      // Garante que o diretório de uploads existe
+      final uploadDir = Directory('uploads');
+      if (!uploadDir.existsSync()) {
+        uploadDir.createSync(recursive: true);
+      }
+
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}_${bytes.hashCode}$ext';
+      final file = File('uploads/$fileName');
+      await file.writeAsBytes(bytes);
+
+      print('Upload realizado com sucesso: uploads/$fileName (${bytes.length} bytes)');
+
+      // Retorna a URL de acesso público
+      return Response.ok(
+        '{"url": "http://localhost:8080/uploads/$fileName"}',
+        headers: {
+          'content-type': 'application/json; charset=utf-8',
+          'Access-Control-Allow-Origin': '*',
+        },
+      );
+    } catch (e) {
+      return Response(HttpStatus.internalServerError, body: '{"error": "${e.toString()}"}', headers: {'content-type': 'application/json'});
+    }
+  });
+
+  // Servir arquivos estáticos de uploads
+  router.get('/uploads/<filename>', (Request request, String filename) async {
+    try {
+      final file = File('uploads/$filename');
+      if (!file.existsSync()) {
+        return Response.notFound('Arquivo não encontrado');
+      }
+
+      String contentType = 'application/octet-stream';
+      if (filename.endsWith('.png')) contentType = 'image/png';
+      if (filename.endsWith('.jpg') || filename.endsWith('.jpeg')) contentType = 'image/jpeg';
+      if (filename.endsWith('.webp')) contentType = 'image/webp';
+
+      return Response.ok(
+        file.openRead(),
+        headers: {
+          'content-type': contentType,
+          'cache-control': 'public, max-age=31536000',
+          'Access-Control-Allow-Origin': '*',
+        },
+      );
+    } catch (e) {
+      return Response.internalServerError(body: e.toString());
+    }
+  });
+
   // Montagem das rotas da API
   router.mount('/api/v1/auth', AuthRoutes().router.call);
   router.mount('/api/v1/balnearios', BalnearioRoutes().router.call);
   router.mount('/api/v1/categorias', CategoriaRoutes().router.call);
   router.mount('/api/v1/estabelecimentos', EstabelecimentoRoutes().router.call);
+  router.mount('/api/v1/auditoria', AuditoriaRoutes().router.call);
+  router.mount('/api/v1/produtos', ProdutoRoutes().router.call);
 
   // Pipeline de Handlers com Middlewares globais
   final handler = const Pipeline()

@@ -3,9 +3,11 @@ import 'dart:io';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import '../services/balneario_service.dart';
+import '../services/auditoria_service.dart';
 
 class BalnearioRoutes {
   final BalnearioService _balnearioService = BalnearioService();
+  final AuditoriaService _auditoriaService = AuditoriaService();
 
   Router get router {
     final router = Router();
@@ -63,6 +65,15 @@ class BalnearioRoutes {
           imagemCapaUrl: imagemCapaUrl,
         );
 
+        final userId = request.context['user_id'] as String? ?? '';
+        final forwarded = request.headers['x-forwarded-for'] ?? '127.0.0.1';
+        await _auditoriaService.registrarLog(
+          usuarioId: userId,
+          acao: 'CRIAR_BALNEARIO',
+          detalhes: 'Cadastrou o balneário "${balneario.nome}" em ${balneario.municipio} - ${balneario.estado}',
+          ip: forwarded.split(',').first.trim(),
+        );
+
         return Response(HttpStatus.created, body: jsonEncode(balneario.toJson()), headers: {'content-type': 'application/json'});
       } catch (e) {
         return Response(HttpStatus.badRequest, body: jsonEncode({'error': e.toString()}), headers: {'content-type': 'application/json'});
@@ -104,6 +115,15 @@ class BalnearioRoutes {
           return Response(HttpStatus.notFound, body: '{"error": "Balneário não encontrado"}', headers: {'content-type': 'application/json'});
         }
 
+        final userId = request.context['user_id'] as String? ?? '';
+        final forwarded = request.headers['x-forwarded-for'] ?? '127.0.0.1';
+        await _auditoriaService.registrarLog(
+          usuarioId: userId,
+          acao: 'EDITAR_BALNEARIO',
+          detalhes: 'Editou o balneário "${updated.nome}" em ${updated.municipio} - ${updated.estado}',
+          ip: forwarded.split(',').first.trim(),
+        );
+
         return Response.ok(jsonEncode(updated.toJson()), headers: {'content-type': 'application/json'});
       } catch (e) {
         return Response(HttpStatus.badRequest, body: jsonEncode({'error': e.toString()}), headers: {'content-type': 'application/json'});
@@ -123,6 +143,15 @@ class BalnearioRoutes {
         if (!deleted) {
           return Response(HttpStatus.notFound, body: '{"error": "Balneário não encontrado"}', headers: {'content-type': 'application/json'});
         }
+
+        final userId = request.context['user_id'] as String? ?? '';
+        final forwarded = request.headers['x-forwarded-for'] ?? '127.0.0.1';
+        await _auditoriaService.registrarLog(
+          usuarioId: userId,
+          acao: 'EXCLUIR_BALNEARIO',
+          detalhes: 'Excluiu o balneário com ID: $id',
+          ip: forwarded.split(',').first.trim(),
+        );
 
         return Response.ok('{"message": "Balneário deletado com sucesso"}', headers: {'content-type': 'application/json'});
       } catch (e) {

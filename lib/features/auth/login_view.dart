@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/providers/auth_provider.dart';
 import '../../core/theme/app_theme.dart';
 
@@ -33,7 +34,14 @@ class _LoginViewState extends State<LoginView> {
     );
 
     if (success && mounted) {
-      context.go('/admin');
+      final role = auth.currentUser?.role;
+      if (role == 'gestor') {
+        context.go('/admin');
+      } else if (role == 'estabelecimento') {
+        context.go('/merchant');
+      } else {
+        context.go('/');
+      }
     }
   }
 
@@ -110,18 +118,19 @@ class _LoginViewState extends State<LoginView> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
-                                Icons.explore,
-                                size: 36,
-                                color: Theme.of(context).colorScheme.primary,
+                              const Text(
+                                '🏝️',
+                                style: TextStyle(fontSize: 36),
                               ),
                               const SizedBox(width: 12),
-                              Text(
+                              const Text(
                                 'Tô Na Rota',
-                                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                      color: Theme.of(context).colorScheme.primary,
-                                      letterSpacing: -1,
-                                    ),
+                                style: TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.primaryTeal,
+                                  letterSpacing: -1,
+                                ),
                               ),
                             ],
                           ),
@@ -168,6 +177,26 @@ class _LoginViewState extends State<LoginView> {
                               return null;
                             },
                           ),
+                          const SizedBox(height: 8),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () => context.push('/forgot-password'),
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size(0, 0),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: Text(
+                                'Esqueci minha senha',
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
                           const SizedBox(height: 12),
 
                           // Erros da API
@@ -196,6 +225,35 @@ class _LoginViewState extends State<LoginView> {
                                     ),
                                   )
                                 : const Text('Entrar no Painel'),
+                          ),
+                          const SizedBox(height: 20),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Não tem uma conta? ',
+                                style: TextStyle(
+                                  color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                  fontSize: 13,
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () => context.push('/merchant/register'),
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                  minimumSize: const Size(0, 0),
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                child: Text(
+                                  'Cadastre seu comércio',
+                                  style: TextStyle(
+                                    color: AppTheme.primaryTeal,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:tonarota_shared/tonarota_shared.dart';
 import '../../core/services/api_service.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/widgets/image_crop_dialog.dart';
 
 class BalneariosView extends StatefulWidget {
   const BalneariosView({super.key});
@@ -16,6 +17,32 @@ class _BalneariosViewState extends State<BalneariosView> {
   List<Balneario> _balnearios = [];
   bool _isLoading = false;
   String? _error;
+
+  // Filtros
+  final TextEditingController _searchController = TextEditingController();
+  String _selectedStatus = 'Todos';
+  String _selectedUf = 'Todos';
+
+  List<Balneario> get _filteredBalnearios {
+    return _balnearios.where((b) {
+      final matchesSearch = b.nome.toLowerCase().contains(_searchController.text.toLowerCase()) ||
+          b.municipio.toLowerCase().contains(_searchController.text.toLowerCase());
+      
+      final matchesStatus = _selectedStatus == 'Todos' ||
+          (_selectedStatus == 'Ativos' && b.ativo) ||
+          (_selectedStatus == 'Inativos' && !b.ativo);
+
+      final matchesUf = _selectedUf == 'Todos' || b.estado.toUpperCase() == _selectedUf.toUpperCase();
+
+      return matchesSearch && matchesStatus && matchesUf;
+    }).toList();
+  }
+
+  List<String> get _availableUfs {
+    final ufs = _balnearios.map((b) => b.estado.toUpperCase()).toSet().toList();
+    ufs.sort();
+    return ['Todos', ...ufs];
+  }
 
   @override
   void initState() {
@@ -55,7 +82,7 @@ class _BalneariosViewState extends State<BalneariosView> {
     final formKey = GlobalKey<FormState>();
     final nomeController = TextEditingController(text: balneario?.nome ?? '');
     final municipioController = TextEditingController(text: balneario?.municipio ?? '');
-    final estadoController = TextEditingController(text: balneario?.estado ?? 'SP');
+    final estadoController = TextEditingController(text: balneario?.estado ?? 'SC');
     final descricaoController = TextEditingController(text: balneario?.descricao ?? '');
     final imagemController = TextEditingController(text: balneario?.imagemCapaUrl ?? '');
     bool ativo = balneario?.ativo ?? true;
@@ -109,10 +136,66 @@ class _BalneariosViewState extends State<BalneariosView> {
                         decoration: const InputDecoration(labelText: 'Descrição Curta'),
                         maxLines: 2,
                       ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: imagemController,
-                        decoration: const InputDecoration(labelText: 'URL da Imagem de Capa'),
+                       const SizedBox(height: 16),
+                      // Container de Pré-visualização da Imagem de Capa
+                      Container(
+                        height: 150,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? const Color(0xFF334155)
+                                : const Color(0xFFE2E8F0),
+                          ),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: imagemController.text.isNotEmpty
+                              ? Image.network(
+                                  imagemController.text,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return const Center(
+                                      child: Icon(Icons.broken_image_outlined, size: 48, color: Colors.grey),
+                                    );
+                                  },
+                                )
+                              : const Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.image_outlined, size: 40, color: Colors.grey),
+                                      SizedBox(height: 8),
+                                      Text(
+                                        'Nenhuma imagem de capa selecionada',
+                                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      OutlinedButton.icon(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (context) => ImageCropDialog(
+                              title: 'Imagem de Capa (16:9)',
+                              aspectRatio: 16 / 9,
+                              onUploadSuccess: (url) {
+                                setModalState(() {
+                                  imagemController.text = url;
+                                });
+                              },
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.crop_outlined),
+                        label: const Text('Selecionar e Cortar Imagem'),
                       ),
                       const SizedBox(height: 16),
                       SwitchListTile(
@@ -239,6 +322,83 @@ class _BalneariosViewState extends State<BalneariosView> {
           ],
         ),
         const SizedBox(height: 24),
+        // Barra de Filtros
+        Card(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: borderColor),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Buscar por nome ou município...',
+                      prefixIcon: const Icon(Icons.search, color: AppTheme.primaryTeal),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                    onChanged: (val) => setState(() {}),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  flex: 1,
+                  child: DropdownButtonFormField<String>(
+                    value: _selectedStatus,
+                    decoration: InputDecoration(
+                      labelText: 'Status',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 'Todos', child: Text('Todos')),
+                      DropdownMenuItem(value: 'Ativos', child: Text('Ativos')),
+                      DropdownMenuItem(value: 'Inativos', child: Text('Inativos')),
+                    ],
+                    onChanged: (val) {
+                      setState(() {
+                        _selectedStatus = val ?? 'Todos';
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  flex: 1,
+                  child: DropdownButtonFormField<String>(
+                    value: _availableUfs.contains(_selectedUf) ? _selectedUf : 'Todos',
+                    decoration: InputDecoration(
+                      labelText: 'UF',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    ),
+                    items: _availableUfs.map((uf) {
+                      return DropdownMenuItem(value: uf, child: Text(uf));
+                    }).toList(),
+                    onChanged: (val) {
+                      setState(() {
+                        _selectedUf = val ?? 'Todos';
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
         if (_isLoading)
           const Expanded(child: Center(child: CircularProgressIndicator()))
         else if (_error != null)
@@ -260,16 +420,22 @@ class _BalneariosViewState extends State<BalneariosView> {
               child: Text('Nenhum balneário cadastrado no sistema.', style: TextStyle(color: secondaryColor)),
             ),
           )
+        else if (_filteredBalnearios.isEmpty)
+          Expanded(
+            child: Center(
+              child: Text('Nenhum balneário corresponde aos filtros selecionados.', style: TextStyle(color: secondaryColor)),
+            ),
+          )
         else
           Expanded(
             child: Card(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: ListView.separated(
-                  itemCount: _balnearios.length,
+                  itemCount: _filteredBalnearios.length,
                   separatorBuilder: (context, index) => Divider(color: borderColor, height: 1),
                   itemBuilder: (context, index) {
-                    final item = _balnearios[index];
+                    final item = _filteredBalnearios[index];
                     return ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       title: Text(item.nome, style: TextStyle(fontWeight: FontWeight.bold, color: primaryColor)),

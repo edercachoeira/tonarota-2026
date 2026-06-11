@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+    <defs>
+        <linearGradient id="tealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#2DD4BF" />
+            <stop offset="100%" stop-color="#0F766E" />
+        </linearGradient>
+    </defs>
+    <!-- Shadow -->
+    <path d="M60 20 C37.9 20 20 37.9 20 60 C20 87.5 60 110 60 110 C60 110 100 87.5 100 60 C100 37.9 82.1 20 60 20 Z" fill="#000000" opacity="0.1"/>
+    <!-- Map Pin shape -->
+    <path d="M60 16 C37.9 16 20 33.9 20 56 C20 83.5 60 106 60 106 C60 106 100 83.5 100 56 C100 33.9 82.1 16 60 16 Z" fill="url(#tealGrad)"/>
+    <!-- Inner Hole -->
+    <circle cx="60" cy="50" r="16" fill="#FFFFFF" />
+    <!-- Center Dot -->
+    <circle cx="60" cy="50" r="6" fill="#D97706" />
+</svg>

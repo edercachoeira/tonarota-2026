@@ -17,6 +17,23 @@ class _CategoriasViewState extends State<CategoriasView> {
   bool _isLoading = false;
   String? _error;
 
+  // Filtros
+  final TextEditingController _searchController = TextEditingController();
+  String _selectedStatus = 'Todos';
+
+  List<Categoria> get _filteredCategorias {
+    return _categorias.where((c) {
+      final matchesSearch = c.nome.toLowerCase().contains(_searchController.text.toLowerCase()) ||
+          (c.descricao != null && c.descricao!.toLowerCase().contains(_searchController.text.toLowerCase()));
+      
+      final matchesStatus = _selectedStatus == 'Todos' ||
+          (_selectedStatus == 'Ativos' && c.ativo) ||
+          (_selectedStatus == 'Inativos' && !c.ativo);
+
+      return matchesSearch && matchesStatus;
+    }).toList();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -238,6 +255,61 @@ class _CategoriasViewState extends State<CategoriasView> {
           ],
         ),
         const SizedBox(height: 24),
+        // Barra de Filtros
+        Card(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: borderColor),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: TextField(
+                    controller: _searchController,
+                    decoration: InputDecoration(
+                      hintText: 'Buscar por nome...',
+                      prefixIcon: const Icon(Icons.search, color: AppTheme.primaryTeal),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                    onChanged: (val) => setState(() {}),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  flex: 1,
+                  child: DropdownButtonFormField<String>(
+                    value: _selectedStatus,
+                    decoration: InputDecoration(
+                      labelText: 'Status',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 'Todos', child: Text('Todos')),
+                      DropdownMenuItem(value: 'Ativos', child: Text('Ativos')),
+                      DropdownMenuItem(value: 'Inativos', child: Text('Inativos')),
+                    ],
+                    onChanged: (val) {
+                      setState(() {
+                        _selectedStatus = val ?? 'Todos';
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 24),
         if (_isLoading)
           const Expanded(child: Center(child: CircularProgressIndicator()))
         else if (_error != null)
@@ -259,16 +331,22 @@ class _CategoriasViewState extends State<CategoriasView> {
               child: Text('Nenhuma categoria cadastrada no sistema.', style: TextStyle(color: secondaryColor)),
             ),
           )
+        else if (_filteredCategorias.isEmpty)
+          Expanded(
+            child: Center(
+              child: Text('Nenhuma categoria corresponde aos filtros selecionados.', style: TextStyle(color: secondaryColor)),
+            ),
+          )
         else
           Expanded(
             child: Card(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
                 child: ListView.separated(
-                  itemCount: _categorias.length,
+                  itemCount: _filteredCategorias.length,
                   separatorBuilder: (context, index) => Divider(color: borderColor, height: 1),
                   itemBuilder: (context, index) {
-                    final item = _categorias[index];
+                    final item = _filteredCategorias[index];
                     final parent = item.parentId != null
                         ? _categorias.firstWhere((c) => c.id == item.parentId, orElse: () => item)
                         : null;

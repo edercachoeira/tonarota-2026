@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120">
+    <defs>
+        <linearGradient id="tealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#2DD4BF" />
+            <stop offset="100%" stop-color="#0F766E" />
+        </linearGradient>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@800&amp;display=swap');
+            .text-main { font-family: 'Outfit', sans-serif; font-size: 64px; font-weight: 800; fill: #0D9488; letter-spacing: -1.5px; }
+            .text-accent { fill: #D97706; }
+        </style>
+    </defs>
+    <!-- Map Pin shape -->
+    <g transform="translate(10, 5)">
+        <path d="M50 10 C27.9 10 10 27.9 10 50 C10 77.5 50 100 50 100 C50 100 90 77.5 90 50 C90 27.9 72.1 10 50 10 Z" fill="url(#tealGrad)"/>
+        <!-- Inner circle/hole -->
+        <circle cx="50" cy="44" r="16" fill="#FFFFFF" />
+        <circle cx="50" cy="44" r="6" fill="#D97706" />
+    </g>
+    <!-- Text -->
+    <text x="110" y="72" class="text-main">Tô Na <tspan class="text-accent">Rota</tspan></text>
+</svg>
