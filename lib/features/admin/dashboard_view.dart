@@ -6,18 +6,22 @@ class DashboardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? AppTheme.textPrimaryDark : AppTheme.textPrimaryLight;
+    final secondaryColor = isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondaryLight;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Linha de Boas-vindas
-        const Text(
+        Text(
           'Olá, Gestor!',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.textPrimaryLight),
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: primaryColor),
         ),
         const SizedBox(height: 8),
-        const Text(
+        Text(
           'Aqui está o resumo geral das atividades e dados do Tô Na Rota.',
-          style: TextStyle(fontSize: 14, color: AppTheme.textSecondaryLight),
+          style: TextStyle(fontSize: 14, color: secondaryColor),
         ),
         const SizedBox(height: 32),
 
@@ -34,6 +38,8 @@ class DashboardView extends StatelessWidget {
                 value: '12',
                 icon: Icons.beach_access,
                 color: AppTheme.primaryTeal,
+                primaryColor: primaryColor,
+                secondaryColor: secondaryColor,
               ),
               _buildStatCard(
                 context,
@@ -41,6 +47,8 @@ class DashboardView extends StatelessWidget {
                 value: '45',
                 icon: Icons.storefront,
                 color: Colors.indigo,
+                primaryColor: primaryColor,
+                secondaryColor: secondaryColor,
               ),
               _buildStatCard(
                 context,
@@ -48,6 +56,8 @@ class DashboardView extends StatelessWidget {
                 value: '8',
                 icon: Icons.category,
                 color: AppTheme.secondaryAmber,
+                primaryColor: primaryColor,
+                secondaryColor: secondaryColor,
               ),
             ];
 
@@ -79,9 +89,9 @@ class DashboardView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Atividades Recentes',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.textPrimaryLight),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: primaryColor),
                   ),
                   const SizedBox(height: 20),
                   Expanded(
@@ -92,18 +102,24 @@ class DashboardView extends StatelessWidget {
                           color: Colors.green,
                           title: 'Novo balneário "Praia da Enseada" cadastrado com sucesso.',
                           time: 'Há 5 minutos',
+                          primaryColor: primaryColor,
+                          secondaryColor: secondaryColor,
                         ),
                         _buildActivityRow(
                           icon: Icons.info_outline,
                           color: Colors.blue,
                           title: 'Lojista "Restaurante do Mar" alterou informações de horário.',
                           time: 'Há 2 horas',
+                          primaryColor: primaryColor,
+                          secondaryColor: secondaryColor,
                         ),
                         _buildActivityRow(
                           icon: Icons.star_border,
                           color: Colors.orange,
                           title: 'Nova avaliação pendente de moderação para "Quiosque do Sol".',
                           time: 'Há 1 dia',
+                          primaryColor: primaryColor,
+                          secondaryColor: secondaryColor,
                         ),
                       ],
                     ),
@@ -123,6 +139,8 @@ class DashboardView extends StatelessWidget {
     required String value,
     required IconData icon,
     required Color color,
+    required Color primaryColor,
+    required Color secondaryColor,
   }) {
     return Card(
       child: Padding(
@@ -144,12 +162,12 @@ class DashboardView extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(fontSize: 14, color: AppTheme.textSecondaryLight),
+                    style: TextStyle(fontSize: 14, color: secondaryColor),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     value,
-                    style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppTheme.textPrimaryLight),
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: primaryColor),
                   ),
                 ],
               ),
@@ -165,6 +183,8 @@ class DashboardView extends StatelessWidget {
     required Color color,
     required String title,
     required String time,
+    required Color primaryColor,
+    required Color secondaryColor,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -175,12 +195,12 @@ class DashboardView extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: const TextStyle(fontSize: 14, color: AppTheme.textPrimaryLight),
+              style: TextStyle(fontSize: 14, color: primaryColor),
             ),
           ),
           Text(
             time,
-            style: const TextStyle(fontSize: 12, color: AppTheme.textSecondaryLight),
+            style: TextStyle(fontSize: 12, color: secondaryColor),
           ),
         ],
       ),

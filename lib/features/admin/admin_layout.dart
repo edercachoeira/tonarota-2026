@@ -16,6 +16,11 @@ class AdminLayout extends StatelessWidget {
     final user = auth.currentUser;
     final currentRoute = GoRouterState.of(context).matchedLocation;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? AppTheme.textPrimaryDark : AppTheme.textPrimaryLight;
+    final secondaryColor = isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondaryLight;
+    final borderColor = isDark ? AppTheme.borderDark : AppTheme.borderLight;
+
     return Scaffold(
       appBar: isMobile
           ? AppBar(
@@ -30,17 +35,17 @@ class AdminLayout extends StatelessWidget {
               ],
             )
           : null,
-      drawer: isMobile ? Drawer(child: _buildSidebarContent(context, currentRoute, auth)) : null,
+      drawer: isMobile ? Drawer(child: _buildSidebarContent(context, currentRoute, auth, primaryColor, secondaryColor, borderColor)) : null,
       body: Row(
         children: [
           // Sidebar fixa para telas grandes
           if (!isMobile)
             Container(
               width: 260,
-              decoration: const BoxDecoration(
-                border: Border(right: BorderSide(color: AppTheme.borderLight, width: 1)),
+              decoration: BoxDecoration(
+                border: Border(right: BorderSide(color: borderColor, width: 1)),
               ),
-              child: _buildSidebarContent(context, currentRoute, auth),
+              child: _buildSidebarContent(context, currentRoute, auth, primaryColor, secondaryColor, borderColor),
             ),
           // Área do Conteúdo Principal
           Expanded(
@@ -52,15 +57,15 @@ class AdminLayout extends StatelessWidget {
                   Container(
                     height: 70,
                     padding: const EdgeInsets.symmetric(horizontal: 24),
-                    decoration: const BoxDecoration(
-                      border: Border(bottom: BorderSide(color: AppTheme.borderLight, width: 1)),
+                    decoration: BoxDecoration(
+                      border: Border(bottom: BorderSide(color: borderColor, width: 1)),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           _getRouteTitle(currentRoute),
-                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.textPrimaryLight),
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: primaryColor),
                         ),
                         Row(
                           children: [
@@ -78,7 +83,7 @@ class AdminLayout extends StatelessWidget {
                               children: [
                                 Text(
                                   user?.nome ?? 'Administrador',
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppTheme.textPrimaryLight),
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: primaryColor),
                                 ),
                                 Text(
                                   user?.role.toUpperCase() ?? 'GESTOR',
@@ -113,8 +118,14 @@ class AdminLayout extends StatelessWidget {
     return 'Administração';
   }
 
-  Widget _buildSidebarContent(BuildContext context, String currentRoute, AuthProvider auth) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+  Widget _buildSidebarContent(
+    BuildContext context,
+    String currentRoute,
+    AuthProvider auth,
+    Color primaryColor,
+    Color secondaryColor,
+    Color borderColor,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -136,7 +147,7 @@ class AdminLayout extends StatelessWidget {
             ],
           ),
         ),
-        const Divider(color: AppTheme.borderLight, height: 1),
+        Divider(color: borderColor, height: 1),
         const SizedBox(height: 16),
         // Links de Navegação
         _buildSidebarItem(
@@ -145,6 +156,8 @@ class AdminLayout extends StatelessWidget {
           label: 'Dashboard',
           route: '/admin/dashboard',
           isSelected: currentRoute == '/admin/dashboard',
+          primaryColor: primaryColor,
+          secondaryColor: secondaryColor,
         ),
         _buildSidebarItem(
           context,
@@ -152,6 +165,8 @@ class AdminLayout extends StatelessWidget {
           label: 'Balneários',
           route: '/admin/balnearios',
           isSelected: currentRoute == '/admin/balnearios',
+          primaryColor: primaryColor,
+          secondaryColor: secondaryColor,
         ),
         _buildSidebarItem(
           context,
@@ -159,10 +174,12 @@ class AdminLayout extends StatelessWidget {
           label: 'Categorias',
           route: '/admin/categorias',
           isSelected: currentRoute == '/admin/categorias',
+          primaryColor: primaryColor,
+          secondaryColor: secondaryColor,
         ),
         const Spacer(),
         // Rodapé com Logout
-        const Divider(color: AppTheme.borderLight, height: 1),
+        Divider(color: borderColor, height: 1),
         Padding(
           padding: const EdgeInsets.all(16),
           child: ListTile(
@@ -184,18 +201,20 @@ class AdminLayout extends StatelessWidget {
     required String label,
     required String route,
     required bool isSelected,
+    required Color primaryColor,
+    required Color secondaryColor,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       child: ListTile(
         leading: Icon(
           icon,
-          color: isSelected ? AppTheme.primaryTeal : AppTheme.textSecondaryLight,
+          color: isSelected ? AppTheme.primaryTeal : secondaryColor,
         ),
         title: Text(
           label,
           style: TextStyle(
-            color: isSelected ? AppTheme.primaryTeal : AppTheme.textPrimaryLight,
+            color: isSelected ? AppTheme.primaryTeal : primaryColor,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
           ),
         ),
