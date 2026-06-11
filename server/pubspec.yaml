@@ -11,5 +11,11 @@ dependencies:
   shelf_router: ^1.1.4
   postgres: ^3.1.2
   dotenv: ^4.1.0
+  bcrypt: ^1.2.0
+  dart_jsonwebtoken: ^2.4.2
   tonarota_shared:
     path: ../shared
+
+dev_dependencies:
+  test: ^1.24.0
+
