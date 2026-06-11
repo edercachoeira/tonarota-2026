@@ -48,3 +48,7 @@ app.*.map.json
 .agent/
 .antigravityignore
 
+# Local Obsidian Vault
+/vault/
+
+
