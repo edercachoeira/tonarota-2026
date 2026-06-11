@@ -28,19 +28,38 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    // Inicializa o roteador passando o AuthProvider registrado no contexto
     final auth = Provider.of<AuthProvider>(context, listen: false);
     _appRouter = AppRouter(auth);
   }
 
   @override
   Widget build(BuildContext context) {
+    final auth = Provider.of<AuthProvider>(context);
+
+    // Mostra indicador de carregamento enquanto tenta fazer o auto-login
+    if (!auth.isInitialized) {
+      return MaterialApp(
+        title: 'Tô Na Rota — Admin',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system,
+        home: const Scaffold(
+          body: Center(
+            child: CircularProgressIndicator(
+              color: AppTheme.primaryTeal,
+            ),
+          ),
+        ),
+      );
+    }
+
     return MaterialApp.router(
       title: 'Tô Na Rota — Admin',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system, // Segue o tema do sistema operacional
+      themeMode: ThemeMode.system,
       routerConfig: _appRouter.router,
     );
   }

@@ -215,15 +215,20 @@ class _CategoriasViewState extends State<CategoriasView> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? AppTheme.textPrimaryDark : AppTheme.textPrimaryLight;
+    final secondaryColor = isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondaryLight;
+    final borderColor = isDark ? AppTheme.borderDark : AppTheme.borderLight;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
+            Text(
               'Lista de Categorias',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.textPrimaryLight),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: primaryColor),
             ),
             ElevatedButton.icon(
               onPressed: () => _showFormModal(),
@@ -249,9 +254,9 @@ class _CategoriasViewState extends State<CategoriasView> {
             ),
           )
         else if (_categorias.isEmpty)
-          const Expanded(
+          Expanded(
             child: Center(
-              child: Text('Nenhuma categoria cadastrada no sistema.'),
+              child: Text('Nenhuma categoria cadastrada no sistema.', style: TextStyle(color: secondaryColor)),
             ),
           )
         else
@@ -261,7 +266,7 @@ class _CategoriasViewState extends State<CategoriasView> {
                 borderRadius: BorderRadius.circular(16),
                 child: ListView.separated(
                   itemCount: _categorias.length,
-                  separatorBuilder: (context, index) => const Divider(color: AppTheme.borderLight, height: 1),
+                  separatorBuilder: (context, index) => Divider(color: borderColor, height: 1),
                   itemBuilder: (context, index) {
                     final item = _categorias[index];
                     final parent = item.parentId != null
@@ -273,9 +278,10 @@ class _CategoriasViewState extends State<CategoriasView> {
                         item.icone.isNotEmpty ? Icons.category : Icons.category_outlined,
                         color: AppTheme.primaryTeal,
                       ),
-                      title: Text(item.nome, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      title: Text(item.nome, style: TextStyle(fontWeight: FontWeight.bold, color: primaryColor)),
                       subtitle: Text(
                         parent != null ? 'Subcategoria de: ${parent.nome}' : 'Categoria Principal (Ordem: ${item.ordem})',
+                        style: TextStyle(color: secondaryColor),
                       ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,

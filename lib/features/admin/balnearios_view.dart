@@ -216,15 +216,20 @@ class _BalneariosViewState extends State<BalneariosView> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = isDark ? AppTheme.textPrimaryDark : AppTheme.textPrimaryLight;
+    final secondaryColor = isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondaryLight;
+    final borderColor = isDark ? AppTheme.borderDark : AppTheme.borderLight;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
+            Text(
               'Lista de Balneários',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.textPrimaryLight),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: primaryColor),
             ),
             ElevatedButton.icon(
               onPressed: () => _showFormModal(),
@@ -250,9 +255,9 @@ class _BalneariosViewState extends State<BalneariosView> {
             ),
           )
         else if (_balnearios.isEmpty)
-          const Expanded(
+          Expanded(
             child: Center(
-              child: Text('Nenhum balneário cadastrado no sistema.'),
+              child: Text('Nenhum balneário cadastrado no sistema.', style: TextStyle(color: secondaryColor)),
             ),
           )
         else
@@ -262,13 +267,13 @@ class _BalneariosViewState extends State<BalneariosView> {
                 borderRadius: BorderRadius.circular(16),
                 child: ListView.separated(
                   itemCount: _balnearios.length,
-                  separatorBuilder: (context, index) => const Divider(color: AppTheme.borderLight, height: 1),
+                  separatorBuilder: (context, index) => Divider(color: borderColor, height: 1),
                   itemBuilder: (context, index) {
                     final item = _balnearios[index];
                     return ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      title: Text(item.nome, style: const TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text('${item.municipio} - ${item.estado}'),
+                      title: Text(item.nome, style: TextStyle(fontWeight: FontWeight.bold, color: primaryColor)),
+                      subtitle: Text('${item.municipio} - ${item.estado}', style: TextStyle(color: secondaryColor)),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
