@@ -44,7 +44,7 @@ class CategoriaService {
         ? 'SELECT id, nome, icone, descricao, ordem, parent_id, ativo FROM categoria WHERE ativo = TRUE ORDER BY ordem ASC, nome ASC'
         : 'SELECT id, nome, icone, descricao, ordem, parent_id, ativo FROM categoria ORDER BY ordem ASC, nome ASC';
 
-    final result = await _db.execute(Sql.raw(query));
+    final result = await _db.execute(Sql(query));
     
     return result.map((row) => Categoria(
       id: row[0] as String,

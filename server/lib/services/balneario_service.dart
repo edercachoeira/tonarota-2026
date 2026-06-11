@@ -46,7 +46,7 @@ class BalnearioService {
         ? 'SELECT id, nome, municipio, estado, descricao, imagem_capa_url, ativo, created_at, updated_at FROM balneario WHERE ativo = TRUE ORDER BY nome ASC'
         : 'SELECT id, nome, municipio, estado, descricao, imagem_capa_url, ativo, created_at, updated_at FROM balneario ORDER BY nome ASC';
 
-    final result = await _db.execute(Sql.raw(query));
+    final result = await _db.execute(Sql(query));
     
     return result.map((row) => Balneario(
       id: row[0] as String,
