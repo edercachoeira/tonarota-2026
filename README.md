@@ -108,7 +108,7 @@ cd server && dart run bin/server.dart
 - [x] Inicialização do projeto Flutter
 - [x] Documentação base (PRD, Setup, Revisão Técnica)
 - [x] Modelagem do banco de dados PostgreSQL
-- [ ] API Dart Shelf (autenticação + CRUDs)
+- [x] API Dart Shelf (autenticação + CRUDs)
 - [ ] Painel do Gestor (Admin Web)
 - [ ] Portal do Lojista (Web SaaS)
 - [ ] Deploy na VPS Hostinger
