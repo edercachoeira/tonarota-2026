@@ -1,0 +1,15 @@
+name: tonarota_server
+description: Backend Dart Shelf for Tô Na Rota.
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  shelf: ^1.4.1
+  shelf_router: ^1.1.4
+  postgres: ^3.1.2
+  dotenv: ^4.1.0
+  tonarota_shared:
+    path: ../shared

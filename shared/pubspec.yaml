@@ -1,0 +1,10 @@
+name: tonarota_shared
+description: Shared models and utilities for Tô Na Rota (Client and Server).
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  meta: ^1.10.0
