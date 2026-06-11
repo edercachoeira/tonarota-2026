@@ -27,5 +27,9 @@ Sempre que você, agente, for solicitado a criar uma "nova feature", siga obriga
 2. **Implementação de UI**: Crie a interface no Flutter garantindo a adesão ao padrão estético.
 3. **Revisão de Design**: Acione a skill de `UX & UI Review` para validar se a interface possui estética premium e boa usabilidade.
 
-## Fase 5: Entrega (Deploy)
+## Fase 5: QA e Testes Automatizados (QA Engineer)
+1. **Criação de Testes**: Escreva os testes unitários (`_test.dart`) para qualquer nova lógica criada na Fase 2 e 3.
+2. **Execução**: Rode a skill `Test Execution Flow` para certificar de que as modificações não causaram regressões em rotas existentes ou na UI.
+
+## Fase 6: Entrega (Deploy)
 - Escreva o resumo das mudanças no `walkthrough.md` e aguarde validação manual antes de qualquer push em massa (seguindo o Nível 1 de Autonomia das regras globais).
