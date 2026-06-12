@@ -18,6 +18,7 @@ class _RegisterViewState extends State<RegisterView> {
   final _formKey = GlobalKey<FormState>();
   final _api = ApiService();
 
+  final _nomeResponsavelController = TextEditingController();
   final _nomeFantasiaController = TextEditingController();
   final _documentoController = TextEditingController();
   final _emailController = TextEditingController();
@@ -42,6 +43,7 @@ class _RegisterViewState extends State<RegisterView> {
 
   @override
   void dispose() {
+    _nomeResponsavelController.dispose();
     _nomeFantasiaController.dispose();
     _documentoController.dispose();
     _emailController.dispose();
@@ -105,7 +107,7 @@ class _RegisterViewState extends State<RegisterView> {
       final registerRes = await _api.post('/v1/auth/register', {
         'email': _emailController.text.trim(),
         'password': _passwordController.text.trim(),
-        'nome': _nomeFantasiaController.text.trim(),
+        'nome': _nomeResponsavelController.text.trim(),
         'role': 'estabelecimento',
       });
 
@@ -266,6 +268,15 @@ class _RegisterViewState extends State<RegisterView> {
                               ],
 
                               // Form Fields Grid
+                              TextFormField(
+                                controller: _nomeResponsavelController,
+                                decoration: const InputDecoration(
+                                  labelText: 'Nome do Responsável / Lojista',
+                                  prefixIcon: Icon(Icons.person_outline),
+                                ),
+                                validator: (val) => val == null || val.trim().isEmpty ? 'Insira o nome do responsável.' : null,
+                              ),
+                              const SizedBox(height: 16),
                               TextFormField(
                                 controller: _nomeFantasiaController,
                                 decoration: const InputDecoration(

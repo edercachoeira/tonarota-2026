@@ -123,6 +123,14 @@ class _EstabelecimentosViewState extends State<EstabelecimentosView> {
     return cat.nome;
   }
 
+  String _getMerchantName(String id) {
+    final user = _merchantUsers.firstWhere(
+      (u) => u.id == id,
+      orElse: () => Usuario(id: '', email: '', nome: 'Não associado', role: 'estabelecimento', ativo: false, createdAt: DateTime.now()),
+    );
+    return user.nome;
+  }
+
   Future<void> _updateStatus(Estabelecimento est, String newStatus) async {
     try {
       final payload = est.toJson();
@@ -802,7 +810,7 @@ class _EstabelecimentosViewState extends State<EstabelecimentosView> {
                                       subtitle: Padding(
                                         padding: const EdgeInsets.only(top: 4.0),
                                         child: Text(
-                                          '🏝️ ${_getBalnearioName(item.balnearioId)} • 🏷️ ${_getCategoriaName(item.categoriaId)} • 📞 ${item.telefone.isNotEmpty ? item.telefone : "Sem Telefone"}',
+                                          '👤 Responsável: ${_getMerchantName(item.usuarioId)} • 🏝️ ${_getBalnearioName(item.balnearioId)} • 🏷️ ${_getCategoriaName(item.categoriaId)} • 📞 ${item.telefone.isNotEmpty ? item.telefone : "Sem Telefone"}',
                                           style: TextStyle(color: secondaryColor, fontSize: 13),
                                         ),
                                       ),
