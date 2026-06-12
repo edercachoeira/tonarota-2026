@@ -271,6 +271,24 @@ class AuthService {
     }).toList();
   }
 
+  Future<List<Usuario>> getUsersByRole(String role) async {
+    final result = await _db.execute(
+      Sql.named("SELECT id, email, nome, role, ativo, created_at FROM usuario WHERE role = @role ORDER BY nome ASC"),
+      parameters: {'role': role},
+    );
+
+    return result.map((row) {
+      return Usuario(
+        id: row[0] as String,
+        email: row[1] as String,
+        nome: row[2] as String,
+        role: row[3] as String,
+        ativo: row[4] as bool,
+        createdAt: row[5] as DateTime,
+      );
+    }).toList();
+  }
+
   Future<bool> deleteUser(String id) async {
     final result = await _db.execute(
       Sql.named('DELETE FROM usuario WHERE id = @id'),

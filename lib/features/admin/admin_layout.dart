@@ -235,6 +235,7 @@ class AdminLayout extends StatelessWidget {
     if (route.contains('/dashboard')) return 'Visão Geral';
     if (route.contains('/balnearios')) return 'Gestão de Balneários';
     if (route.contains('/categorias')) return 'Gestão de Categorias';
+    if (route.contains('/estabelecimentos')) return 'Gestão de Estabelecimentos';
     if (route.contains('/gestores')) return 'Equipe & Gestores';
     if (route.contains('/auditoria')) return 'Auditoria do Sistema';
     if (route.contains('/perfil')) return 'Meu Perfil';
@@ -310,6 +311,13 @@ class AdminLayout extends StatelessWidget {
           route: '/admin/categorias',
           isSelected: currentRoute == '/admin/categorias',
         ),
+        _AnimatedSidebarItem(
+          icon: Icons.storefront_rounded,
+          label: 'Estabelecimentos',
+          route: '/admin/estabelecimentos',
+          isSelected: currentRoute == '/admin/estabelecimentos',
+        ),
+
 
         if (auth.currentUser?.role == 'gestor') ...[
           const SizedBox(height: 24),

@@ -155,6 +155,22 @@ class AuthRoutes {
       }
     });
 
+    // Listar todos os usuários de um cargo específico (apenas para gestores)
+    router.get('/usuarios/<role>', (Request request, String role) async {
+      try {
+        final userRole = request.context['user_role'] as String?;
+        if (userRole != 'gestor') {
+          return Response(HttpStatus.forbidden, body: '{"error": "Acesso negado"}', headers: {'content-type': 'application/json'});
+        }
+
+        final list = await _authService.getUsersByRole(role);
+        final listJson = list.map((u) => u.toJson()).toList();
+        return Response.ok(jsonEncode(listJson), headers: {'content-type': 'application/json'});
+      } catch (e) {
+        return Response(HttpStatus.internalServerError, body: jsonEncode({'error': e.toString()}), headers: {'content-type': 'application/json'});
+      }
+    });
+
     // Excluir gestor (apenas para gestores, impede deletar a si mesmo)
     router.delete('/gestores/<id>', (Request request, String id) async {
       try {
@@ -219,7 +235,7 @@ class AuthRoutes {
           return Response(HttpStatus.badRequest, body: '{"error": "E-mail obrigatório"}', headers: {'content-type': 'application/json'});
         }
 
-        final success = await _authService.solicitarRecuperacao(email);
+        await _authService.solicitarRecuperacao(email);
         // Retornamos OK mesmo se o e-mail não existir por questões de segurança (impedir user enumeration),
         // mas informamos ao cliente a mensagem padrão de envio.
         return Response.ok('{"message": "Se o e-mail estiver cadastrado, um link de recuperação foi enviado."}', headers: {'content-type': 'application/json'});

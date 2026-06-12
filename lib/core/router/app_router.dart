@@ -9,6 +9,7 @@ import '../../features/admin/categorias_view.dart';
 import '../../features/admin/gestores_view.dart';
 import '../../features/admin/perfil_view.dart';
 import '../../features/admin/auditoria_view.dart';
+import '../../features/admin/estabelecimentos_view.dart';
 import '../../features/auth/confirmacao_email_view.dart';
 import '../../features/auth/recuperacao_senha_view.dart';
 import '../../features/public/home_view.dart';
@@ -114,6 +115,11 @@ class AppRouter {
             path: '/admin/categorias',
             builder: (context, state) => const CategoriasView(),
           ),
+          GoRoute(
+            path: '/admin/estabelecimentos',
+            builder: (context, state) => const EstabelecimentosView(),
+          ),
+
           GoRoute(
             path: '/admin/gestores',
             builder: (context, state) => const GestoresView(),
