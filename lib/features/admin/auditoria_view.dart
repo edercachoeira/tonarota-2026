@@ -220,118 +220,114 @@ class _AuditoriaViewState extends State<AuditoriaView> {
                   builder: (context, constraints) {
                     final isNarrow = constraints.maxWidth < 900;
                     
-                    final fields = [
-                      // Busca textual
-                      Expanded(
-                        flex: isNarrow ? 0 : 3,
-                        child: TextFormField(
-                          controller: _searchController,
-                          decoration: const InputDecoration(
-                            labelText: 'Buscar por usuário ou detalhes...',
-                            prefixIcon: Icon(Icons.search_rounded),
-                          ),
-                          onFieldSubmitted: (_) => _fetchLogs(),
-                        ),
+                    final buscaTextual = TextFormField(
+                      controller: _searchController,
+                      decoration: const InputDecoration(
+                        labelText: 'Buscar por usuário ou detalhes...',
+                        prefixIcon: Icon(Icons.search_rounded),
                       ),
-                      if (isNarrow) const SizedBox(height: 12),
-                      // Dropdown de Ação
-                      Expanded(
-                        flex: isNarrow ? 0 : 2,
-                        child: DropdownButtonFormField<String>(
-                          value: _selectedAcao,
-                          decoration: const InputDecoration(
-                            labelText: 'Ação Realizada',
-                            prefixIcon: Icon(Icons.settings_outlined),
+                      onFieldSubmitted: (_) => _fetchLogs(),
+                    );
+                    
+                    final dropdownAcao = DropdownButtonFormField<String>(
+                      value: _selectedAcao,
+                      decoration: const InputDecoration(
+                        labelText: 'Ação Realizada',
+                        prefixIcon: Icon(Icons.settings_outlined),
+                      ),
+                      items: _acoesList.map((acao) {
+                        return DropdownMenuItem(
+                          value: acao,
+                          child: Text(acao),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) {
+                          setState(() {
+                            _selectedAcao = val;
+                          });
+                          _fetchLogs();
+                        }
+                      },
+                    );
+                    
+                    final periodoFiltro = Row(
+                      children: [
+                        // Data Inicial
+                        Expanded(
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(8),
+                            onTap: () => _pickDate(isStart: true),
+                            child: InputDecorator(
+                              decoration: const InputDecoration(
+                                labelText: 'De',
+                                prefixIcon: Icon(Icons.calendar_today, size: 18),
+                                isDense: true,
+                              ),
+                              child: Text(
+                                _startDate != null ? _formatDate(_startDate!) : 'Início',
+                                style: TextStyle(color: primaryColor, fontSize: 13),
+                              ),
+                            ),
                           ),
-                          items: _acoesList.map((acao) {
-                            return DropdownMenuItem(
-                              value: acao,
-                              child: Text(acao),
-                            );
-                          }).toList(),
-                          onChanged: (val) {
-                            if (val != null) {
+                        ),
+                        const SizedBox(width: 8),
+                        // Data Final
+                        Expanded(
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(8),
+                            onTap: () => _pickDate(isStart: false),
+                            child: InputDecorator(
+                              decoration: const InputDecoration(
+                                labelText: 'Até',
+                                prefixIcon: Icon(Icons.calendar_today, size: 18),
+                                isDense: true,
+                              ),
+                              child: Text(
+                                _endDate != null ? _formatDate(_endDate!) : 'Final',
+                                style: TextStyle(color: primaryColor, fontSize: 13),
+                              ),
+                            ),
+                          ),
+                        ),
+                        // Limpar
+                        if (_startDate != null || _endDate != null)
+                          IconButton(
+                            icon: const Icon(Icons.close, size: 18),
+                            tooltip: 'Limpar período',
+                            onPressed: () {
                               setState(() {
-                                _selectedAcao = val;
+                                _startDate = null;
+                                _endDate = null;
                               });
                               _fetchLogs();
-                            }
-                          },
-                        ),
-                      ),
-                      if (isNarrow) const SizedBox(height: 12),
-                      // Período: dois campos compactos lado a lado
-                      Expanded(
-                        flex: isNarrow ? 0 : 3,
-                        child: Row(
-                          children: [
-                            // Data Inicial
-                            Expanded(
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(8),
-                                onTap: () => _pickDate(isStart: true),
-                                child: InputDecorator(
-                                  decoration: const InputDecoration(
-                                    labelText: 'De',
-                                    prefixIcon: Icon(Icons.calendar_today, size: 18),
-                                    isDense: true,
-                                  ),
-                                  child: Text(
-                                    _startDate != null ? _formatDate(_startDate!) : 'Início',
-                                    style: TextStyle(color: primaryColor, fontSize: 13),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            // Data Final
-                            Expanded(
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(8),
-                                onTap: () => _pickDate(isStart: false),
-                                child: InputDecorator(
-                                  decoration: const InputDecoration(
-                                    labelText: 'Até',
-                                    prefixIcon: Icon(Icons.calendar_today, size: 18),
-                                    isDense: true,
-                                  ),
-                                  child: Text(
-                                    _endDate != null ? _formatDate(_endDate!) : 'Final',
-                                    style: TextStyle(color: primaryColor, fontSize: 13),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            // Limpar
-                            if (_startDate != null || _endDate != null)
-                              IconButton(
-                                icon: const Icon(Icons.close, size: 18),
-                                tooltip: 'Limpar período',
-                                onPressed: () {
-                                  setState(() {
-                                    _startDate = null;
-                                    _endDate = null;
-                                  });
-                                  _fetchLogs();
-                                },
-                              ),
-                          ],
-                        ),
-                      ),
-                    ];
+                            },
+                          ),
+                      ],
+                    );
 
                     if (isNarrow) {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: fields.map((f) => f is Expanded ? f.child : f).toList(),
+                        children: [
+                          buscaTextual,
+                          const SizedBox(height: 12),
+                          dropdownAcao,
+                          const SizedBox(height: 12),
+                          periodoFiltro,
+                        ],
                       );
                     }
 
                     return Row(
-                      children: fields.map((f) => Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 6),
-                        child: SizedBox(width: constraints.maxWidth / 3.3, child: f),
-                      )).toList(),
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(flex: 3, child: buscaTextual),
+                        const SizedBox(width: 16),
+                        Expanded(flex: 2, child: dropdownAcao),
+                        const SizedBox(width: 16),
+                        Expanded(flex: 3, child: periodoFiltro),
+                      ],
                     );
                   },
                 ),
@@ -379,13 +375,14 @@ class _AuditoriaViewState extends State<AuditoriaView> {
                   separatorBuilder: (context, index) => Divider(color: borderColor, height: 1),
                   itemBuilder: (context, index) {
                     final log = _logs[index];
-                    final acao = log['acao'] as String;
+                    final acao = log['acao']?.toString() ?? 'DESCONHECIDO';
                     final actionColor = _getActionColor(acao);
                     
                     // Formatação da data para visualização humana
-                    final parsedDate = DateTime.parse(log['created_at'] as String).toLocal();
+                    final createdAt = log['created_at'];
+                    final parsedDate = createdAt != null ? DateTime.parse(createdAt.toString()).toLocal() : DateTime.now();
                     final timeStr = '${parsedDate.day.toString().padLeft(2, '0')}/${parsedDate.month.toString().padLeft(2, '0')}/${parsedDate.year} ${parsedDate.hour.toString().padLeft(2, '0')}:${parsedDate.minute.toString().padLeft(2, '0')}';
-
+ 
                     return ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                       leading: Container(
@@ -416,7 +413,7 @@ class _AuditoriaViewState extends State<AuditoriaView> {
                             Icon(Icons.person_outline_rounded, size: 14, color: secondaryColor),
                             const SizedBox(width: 4),
                             Text(
-                              log['usuario_nome'] as String,
+                              log['usuario_nome']?.toString() ?? 'Desconhecido',
                               style: TextStyle(color: secondaryColor, fontSize: 12),
                             ),
                             const SizedBox(width: 16),
@@ -430,7 +427,7 @@ class _AuditoriaViewState extends State<AuditoriaView> {
                             Icon(Icons.lan_outlined, size: 14, color: secondaryColor),
                             const SizedBox(width: 4),
                             Text(
-                              'IP: ${log['ip']}',
+                              'IP: ${log['ip'] ?? 'Desconhecido'}',
                               style: TextStyle(color: secondaryColor, fontSize: 12),
                             ),
                           ],

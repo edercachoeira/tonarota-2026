@@ -544,6 +544,231 @@ ul, ol { list-style: none; }
 }
 
 /* ======================== */
+/*  BREADCRUMB NAVIGATION   */
+/* ======================== */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.breadcrumb-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--teal-500);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.breadcrumb-back:hover {
+  background: var(--bg-surface-hover);
+  border-color: var(--teal-600);
+  transform: translateX(-2px);
+}
+
+.breadcrumb-separator {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.breadcrumb-current {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Balneário card establishment count */
+.card-est-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+.card-est-count strong {
+  color: var(--teal-500);
+  font-weight: 700;
+}
+
+/* ======================== */
+/*  ESTABELECIMENTO CARDS   */
+/* ======================== */
+
+.est-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: all var(--transition);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.est-card:hover {
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-card), var(--shadow-glow);
+  transform: translateY(-4px);
+}
+
+.est-card-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 20px 0;
+}
+
+.est-card-logo {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+  background: var(--bg-surface-hover);
+}
+
+.est-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.est-card-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.est-card-category {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--teal-500);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.est-card-rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: rgba(245,158,11,0.1);
+  border: 1px solid rgba(245,158,11,0.2);
+  border-radius: var(--radius-pill);
+  flex-shrink: 0;
+}
+
+.est-card-rating .stars {
+  color: var(--amber-500);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.est-card-rating .count {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.est-card-body {
+  padding: 16px 20px;
+  flex: 1;
+}
+
+.est-card-desc {
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.est-card-location {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  margin-top: 10px;
+}
+
+.est-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px 20px;
+}
+
+.est-card-footer .plan-badge {
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.plan-badge.premium {
+  background: linear-gradient(135deg, var(--amber-600), var(--amber-500));
+  color: #fff;
+}
+
+.plan-badge.gratuito {
+  background: rgba(100,116,139,0.15);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+
+.est-card-footer .contact-links {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.contact-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg-surface-hover);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  transition: all var(--transition);
+  text-decoration: none;
+}
+.contact-link:hover {
+  border-color: var(--teal-600);
+  color: var(--teal-500);
+  transform: scale(1.1);
+}
+.contact-link.whatsapp:hover {
+  border-color: #25D366;
+  color: #25D366;
+  background: rgba(37,211,102,0.08);
+}
+.contact-link.instagram:hover {
+  border-color: #E1306C;
+  color: #E1306C;
+  background: rgba(225,48,108,0.08);
+}
+
+/* ======================== */
 /*  ANIMATIONS              */
 /* ======================== */
 @keyframes fadeInUp {
@@ -557,3 +782,9 @@ ul, ol { list-style: none; }
 .card:nth-child(4) { animation-delay: 0.24s; }
 .card:nth-child(5) { animation-delay: 0.32s; }
 .card:nth-child(6) { animation-delay: 0.40s; }
+
+.est-card { animation: fadeInUp 0.5s ease both; }
+.est-card:nth-child(2) { animation-delay: 0.08s; }
+.est-card:nth-child(3) { animation-delay: 0.16s; }
+.est-card:nth-child(4) { animation-delay: 0.24s; }
+

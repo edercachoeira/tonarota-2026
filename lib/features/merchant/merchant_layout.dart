@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
@@ -354,6 +355,7 @@ class MerchantLayoutState extends State<MerchantLayout> {
                 route: '/',
                 isSelected: false,
                 isCompact: true,
+                onTapOverride: () => html.window.open('/', '_blank'),
               ),
               const SizedBox(height: 4),
               _AnimatedSidebarItem(
