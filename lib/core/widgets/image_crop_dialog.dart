@@ -31,12 +31,9 @@ class _ImageCropDialogState extends State<ImageCropDialog> {
   String? _errorMessage;
 
   final TransformationController _transformController = TransformationController();
-  final GlobalKey _cropFrameKey = GlobalKey();
-  final GlobalKey _imageKey = GlobalKey();
 
-  // Dimensões do Crop Frame no viewport
-  final double _cropWidth = 320.0;
-  late final double _cropHeight = _cropWidth / widget.aspectRatio;
+  // Dimensões da área do visualizador (container)
+  static const double _viewerHeight = 300.0;
 
   void _pickImage() {
     final uploadInput = html.FileUploadInputElement()..accept = 'image/*';
@@ -93,54 +90,93 @@ class _ImageCropDialogState extends State<ImageCropDialog> {
     });
 
     try {
-      // 1. Obtém a matriz de transformação do InteractiveViewer (storage é column-major)
-      final matrix = _transformController.value;
-      final double scale = matrix.storage[0];  // Escala (Sx) em row 0, col 0
-      final double tx = matrix.storage[12];    // Translação X (Tx) em row 0, col 3
-      final double ty = matrix.storage[13];    // Translação Y (Ty) em row 1, col 3
+      // Dimensões originais da imagem em pixels
+      final int imgW = _decodedImage!.width;
+      final int imgH = _decodedImage!.height;
 
-      // 2. Calcula as posições dos componentes na tela
-      final RenderBox? imageBox = _imageKey.currentContext?.findRenderObject() as RenderBox?;
-      final RenderBox? frameBox = _cropFrameKey.currentContext?.findRenderObject() as RenderBox?;
-
-      if (imageBox == null || frameBox == null) {
-        throw Exception('Erro de layout ao calcular posições do corte.');
+      // Obtém o tamanho real do container no viewport (largura real, não fixa)
+      // Usaremos _viewerWidth calculada a partir do container
+      final RenderBox? viewerBox = _viewerKey.currentContext?.findRenderObject() as RenderBox?;
+      if (viewerBox == null) {
+        throw Exception('Erro de layout: container do viewer não encontrado.');
       }
+      final double viewerWidth = viewerBox.size.width;
+      final double viewerHeight = viewerBox.size.height;
 
-      // Localiza a posição do frame de corte e da imagem na tela global
-      final frameOffset = frameBox.localToGlobal(Offset.zero);
-      final imageOffset = imageBox.localToGlobal(Offset.zero);
+      // Escala base: como a imagem se encaixa no container (BoxFit.contain implícito)
+      final double scaleX = viewerWidth / imgW;
+      final double scaleY = viewerHeight / imgH;
+      final double baseScale = scaleX < scaleY ? scaleX : scaleY;
 
-      // Distância relativa do topo esquerdo do frame até o topo esquerdo da imagem
-      final double relativeLeft = frameOffset.dx - imageOffset.dx;
-      final double relativeTop = frameOffset.dy - imageOffset.dy;
+      // Tamanho da imagem como renderizada (antes do InteractiveViewer zoom)
+      final double renderedW = imgW * baseScale;
+      final double renderedH = imgH * baseScale;
 
-      // 3. Mapeia esses pontos de volta à escala original da imagem
-      // Como o imageOffset retornado pelo localToGlobal já contém as translações (tx/ty),
-      // a distância relativa na tela dividida pela escala dá a coordenada local exata no frame original.
-      final double srcX = relativeLeft / scale;
-      final double srcY = relativeTop / scale;
-      final double srcW = _cropWidth / scale;
-      final double srcH = _cropHeight / scale;
+      // Offset da imagem dentro do container (centralização)
+      final double offsetX = (viewerWidth - renderedW) / 2.0;
+      final double offsetY = (viewerHeight - renderedH) / 2.0;
 
-      // 4. Executa o corte renderizando no canvas do Flutter
-      final recorder = ui.PictureRecorder();
-      // Resolução desejada da imagem final recortada (ex: 1280x720 para qualidade HD)
+      // Dimensões do crop frame no viewport
+      final double cropW = _getCropWidth(viewerWidth);
+      final double cropH = cropW / widget.aspectRatio;
+
+      // Posição do crop frame no container (centralizado)
+      final double cropLeft = (viewerWidth - cropW) / 2.0;
+      final double cropTop = (viewerHeight - cropH) / 2.0;
+
+      // Transformação do InteractiveViewer
+      final matrix = _transformController.value;
+      final double ivScale = matrix.storage[0]; // zoom do InteractiveViewer
+      final double ivTx = matrix.storage[12];   // translação X
+      final double ivTy = matrix.storage[13];   // translação Y
+
+      // Escala total (base * zoom do InteractiveViewer)
+      final double totalScale = baseScale * ivScale;
+
+      // A posição da imagem no viewport, considerando o offset de centralização,
+      // a translação e a escala do InteractiveViewer.
+      // O InteractiveViewer aplica escala e translação sobre o child que inclui
+      // o offset de centralização.
+      //
+      // Posição do pixel (0,0) da imagem original no viewport:
+      //   viewportX = (offsetX + 0 * baseScale) * ivScale + ivTx
+      //   viewportX = offsetX * ivScale + ivTx
+      //
+      // Para mapear o crop frame de volta para coordenadas da imagem original:
+      //   cropLeft = offsetX * ivScale + ivTx + srcX * totalScale
+      //   srcX = (cropLeft - offsetX * ivScale - ivTx) / totalScale
+
+      final double srcX = (cropLeft - offsetX * ivScale - ivTx) / totalScale;
+      final double srcY = (cropTop - offsetY * ivScale - ivTy) / totalScale;
+      final double srcW = cropW / totalScale;
+      final double srcH = cropH / totalScale;
+
+      // Clamp ao tamanho da imagem para evitar erros
+      final double clampedX = srcX.clamp(0, imgW.toDouble());
+      final double clampedY = srcY.clamp(0, imgH.toDouble());
+      final double clampedW = srcW.clamp(0, imgW.toDouble() - clampedX);
+      final double clampedH = srcH.clamp(0, imgH.toDouble() - clampedY);
+
+      // Renderiza o corte no canvas do Flutter
       const double targetWidth = 1280.0;
       final double targetHeight = targetWidth / widget.aspectRatio;
 
+      final recorder = ui.PictureRecorder();
       final canvas = ui.Canvas(recorder);
 
-      final srcRect = Rect.fromLTWH(srcX, srcY, srcW, srcH);
+      final srcRect = Rect.fromLTWH(clampedX, clampedY, clampedW, clampedH);
       final dstRect = Rect.fromLTWH(0, 0, targetWidth, targetHeight);
 
-      // Desenha a fatia recortada no canvas
-      canvas.drawImageRect(_decodedImage!, srcRect, dstRect, Paint()..filterQuality = ui.FilterQuality.high);
+      canvas.drawImageRect(
+        _decodedImage!,
+        srcRect,
+        dstRect,
+        Paint()..filterQuality = ui.FilterQuality.high,
+      );
 
-      // Finaliza a gravação e converte em imagem física
       final picture = recorder.endRecording();
       final croppedImage = await picture.toImage(targetWidth.toInt(), targetHeight.toInt());
-      
+
       final byteData = await croppedImage.toByteData(format: ui.ImageByteFormat.png);
       if (byteData == null) {
         throw Exception('Falha ao exportar bytes da imagem cortada.');
@@ -148,7 +184,7 @@ class _ImageCropDialogState extends State<ImageCropDialog> {
 
       final croppedBytes = byteData.buffer.asUint8List();
 
-      // 5. Faz o upload dos bytes brutos para o backend
+      // Upload dos bytes brutos para o backend
       final uri = Uri.parse('http://localhost:8080/api/v1/upload');
       final response = await http.post(
         uri,
@@ -162,7 +198,7 @@ class _ImageCropDialogState extends State<ImageCropDialog> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         final String uploadedUrl = data['url'] as String;
-        
+
         widget.onUploadSuccess(uploadedUrl);
         if (mounted) Navigator.pop(context);
       } else {
@@ -175,6 +211,14 @@ class _ImageCropDialogState extends State<ImageCropDialog> {
       });
     }
   }
+
+  // Calcula a largura do crop frame com base na largura do container
+  double _getCropWidth(double containerWidth) {
+    // O crop frame ocupa no máximo 90% da largura do container, até 320px
+    return (containerWidth * 0.85).clamp(100, 320);
+  }
+
+  final GlobalKey _viewerKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -213,7 +257,8 @@ class _ImageCropDialogState extends State<ImageCropDialog> {
 
             // Área do Visualizador / Corte
             Container(
-              height: 300,
+              key: _viewerKey,
+              height: _viewerHeight,
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
                 borderRadius: BorderRadius.circular(16),
@@ -223,72 +268,70 @@ class _ImageCropDialogState extends State<ImageCropDialog> {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    if (_decodedImage == null && !_isDecoding) ...[
-                      // Tela Inicial sem arquivo
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.cloud_upload_outlined,
-                            size: 48,
-                            color: AppTheme.primaryTeal.withOpacity(0.8),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'Selecione uma imagem de alta resolução',
-                            style: TextStyle(color: isDark ? Colors.white60 : Colors.black54, fontSize: 13),
-                          ),
-                          const SizedBox(height: 16),
-                          ElevatedButton(
-                            onPressed: _pickImage,
-                            child: const Text('Escolher Arquivo'),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final double containerW = constraints.maxWidth;
+                    final double containerH = constraints.maxHeight;
+                    final double cropW = _getCropWidth(containerW);
+                    final double cropH = cropW / widget.aspectRatio;
+
+                    return Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        if (_decodedImage == null && !_isDecoding) ...[
+                          // Tela Inicial sem arquivo
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.cloud_upload_outlined,
+                                size: 48,
+                                color: AppTheme.primaryTeal.withOpacity(0.8),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'Selecione uma imagem de alta resolução',
+                                style: TextStyle(color: isDark ? Colors.white60 : Colors.black54, fontSize: 13),
+                              ),
+                              const SizedBox(height: 16),
+                              ElevatedButton(
+                                onPressed: _pickImage,
+                                child: const Text('Escolher Arquivo'),
+                              )
+                            ],
                           )
-                        ],
-                      )
-                    ] else if (_isDecoding) ...[
-                      // Processamento/Carregamento
-                      const CircularProgressIndicator()
-                    ] else ...[
-                      // Visualizador interativo de Imagem
-                      InteractiveViewer(
-                        transformationController: _transformController,
-                        maxScale: 5.0,
-                        minScale: 0.1,
-                        boundaryMargin: const EdgeInsets.all(100),
-                        child: Center(
-                          key: _imageKey,
-                          child: Image.memory(_imageBytes!),
-                        ),
-                      ),
-                      // Overlay de Máscara Escura e Frame de Recorte
-                      IgnorePointer(
-                        child: CustomPaint(
-                          size: Size.infinite,
-                          painter: CropOverlayPainter(
-                            cropWidth: _cropWidth,
-                            cropHeight: _cropHeight,
-                            isDark: isDark,
-                          ),
-                        ),
-                      ),
-                      // Frame Delimitador (para cálculo de tamanho e offset)
-                      Positioned(
-                        width: _cropWidth,
-                        height: _cropHeight,
-                        child: IgnorePointer(
-                          child: Container(
-                            key: _cropFrameKey,
-                            decoration: BoxDecoration(
-                              border: Border.all(color: AppTheme.primaryTeal, width: 2),
+                        ] else if (_isDecoding) ...[
+                          // Processamento/Carregamento
+                          const CircularProgressIndicator()
+                        ] else ...[
+                          // Visualizador interativo de Imagem
+                          InteractiveViewer(
+                            transformationController: _transformController,
+                            maxScale: 5.0,
+                            minScale: 0.5,
+                            boundaryMargin: const EdgeInsets.all(200),
+                            child: Center(
+                              child: Image.memory(
+                                _imageBytes!,
+                                fit: BoxFit.contain,
+                              ),
                             ),
                           ),
-                        ),
-                      ),
-                    ],
-                  ],
+                          // Overlay de Máscara Escura e Frame de Recorte
+                          IgnorePointer(
+                            child: CustomPaint(
+                              size: Size(containerW, containerH),
+                              painter: CropOverlayPainter(
+                                cropWidth: cropW,
+                                cropHeight: cropH,
+                                isDark: isDark,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
@@ -297,7 +340,7 @@ class _ImageCropDialogState extends State<ImageCropDialog> {
               const SizedBox(height: 12),
               Center(
                 child: Text(
-                  '💡 Dica: Arraste com um dedo para mover a imagem e use a pinça para redimensionar.',
+                  '💡 Dica: Arraste para mover a imagem e use scroll/pinça para redimensionar.',
                   style: TextStyle(color: isDark ? Colors.white54 : Colors.black54, fontSize: 11),
                 ),
               ),
@@ -381,6 +424,35 @@ class CropOverlayPainter extends CustomPainter {
       ),
       backgroundPaint,
     );
+
+    // Borda do crop frame
+    final borderPaint = Paint()
+      ..color = AppTheme.primaryTeal
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+    canvas.drawRect(cropRect, borderPaint);
+
+    // Cantos destacados do crop frame
+    const double cornerLen = 20.0;
+    const double cornerWidth = 3.0;
+    final cornerPaint = Paint()
+      ..color = AppTheme.primaryTeal
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = cornerWidth
+      ..strokeCap = StrokeCap.round;
+
+    // Top-left
+    canvas.drawLine(Offset(left, top), Offset(left + cornerLen, top), cornerPaint);
+    canvas.drawLine(Offset(left, top), Offset(left, top + cornerLen), cornerPaint);
+    // Top-right
+    canvas.drawLine(Offset(left + cropWidth, top), Offset(left + cropWidth - cornerLen, top), cornerPaint);
+    canvas.drawLine(Offset(left + cropWidth, top), Offset(left + cropWidth, top + cornerLen), cornerPaint);
+    // Bottom-left
+    canvas.drawLine(Offset(left, top + cropHeight), Offset(left + cornerLen, top + cropHeight), cornerPaint);
+    canvas.drawLine(Offset(left, top + cropHeight), Offset(left, top + cropHeight - cornerLen), cornerPaint);
+    // Bottom-right
+    canvas.drawLine(Offset(left + cropWidth, top + cropHeight), Offset(left + cropWidth - cornerLen, top + cropHeight), cornerPaint);
+    canvas.drawLine(Offset(left + cropWidth, top + cropHeight), Offset(left + cropWidth, top + cropHeight - cornerLen), cornerPaint);
   }
 
   @override

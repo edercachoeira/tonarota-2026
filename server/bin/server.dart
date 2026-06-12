@@ -121,6 +121,58 @@ void main(List<String> args) async {
   router.mount('/api/v1/auditoria', AuditoriaRoutes().router.call);
   router.mount('/api/v1/produtos', ProdutoRoutes().router.call);
 
+  // ─── STATIC FILE SERVING ───────────────────────────────────────
+  // Obtém o diretório do executável ou script em execução
+  final serverBinDir = File(Platform.script.toFilePath()).parent.path;
+  
+  // Vamos resolver o projectRoot a partir do diretório onde o executável ou script está.
+  // Se estivermos rodando no script (server/bin/server.dart) ou no executável (server/bin/server.exe),
+  // a raiz do projeto é a pasta pai de 'server' (duas pastas acima de serverBinDir).
+  // Se por acaso o executável for movido para a raiz no futuro, fazemos um fallback seguro.
+  String resolvedProjectRoot = Directory(serverBinDir).parent.parent.path;
+  
+  // Caso de fallback: se a raiz resolvida não contiver a pasta 'server', 
+  // pode ser que estejamos rodando de outro lugar. Garantimos a consistência:
+  if (!Directory('$resolvedProjectRoot/server').existsSync()) {
+    resolvedProjectRoot = Directory(serverBinDir).parent.path;
+  }
+  if (!Directory('$resolvedProjectRoot/server').existsSync()) {
+    resolvedProjectRoot = Directory.current.path; // último fallback
+  }
+
+  print('Diretório do executável/script: $serverBinDir');
+  print('Diretório raiz do projeto resolvido: $resolvedProjectRoot');
+
+  // Serve o favicon na raiz
+  router.get('/favicon.png', (Request request) async {
+    return _serveStaticFile('$resolvedProjectRoot/server/public/favicon.png', request);
+  });
+
+  // Serve arquivos estáticos da Landing Page (public/)
+  router.get('/style.css', (Request request) => _serveStaticFile('$resolvedProjectRoot/server/public/style.css', request));
+  router.get('/app.js', (Request request) => _serveStaticFile('$resolvedProjectRoot/server/public/app.js', request));
+
+  // Serve o Flutter Web build em /app/
+  router.get('/app/<path|.*>', (Request request, String path) async {
+    // Se a rota for vazia ou for uma sub-rota do Flutter (SPA), servimos o index.html.
+    // Para identificar se é um arquivo real (com extensão) ou uma rota de tela do Flutter:
+    final cleanPath = path.isEmpty ? 'index.html' : path;
+    
+    // Caminho físico no build do Flutter Web
+    final filePath = '$resolvedProjectRoot/build/web/$cleanPath';
+    final file = File(filePath);
+
+    if (file.existsSync()) {
+      return _serveStaticFile(filePath, request);
+    }
+
+    // SPA fallback: se for uma rota virtual do Flutter (sem arquivo correspondente), serve o index.html
+    return _serveStaticFile('$resolvedProjectRoot/build/web/index.html', request);
+  });
+
+  // Landing page: serve a rota raiz
+  router.get('/', (Request request) => _serveStaticFile('$resolvedProjectRoot/server/public/index.html', request));
+
   // Pipeline de Handlers com Middlewares globais
   final handler = const Pipeline()
       .addMiddleware(logRequests())
@@ -131,6 +183,59 @@ void main(List<String> args) async {
 
   final server = await io.serve(handler, InternetAddress.anyIPv4, port);
   print('Servidor rodando em http://${server.address.host}:${server.port}');
+  print('  Landing Page: http://localhost:$port/');
+  print('  Flutter App:  http://localhost:$port/app/');
+  print('  API:          http://localhost:$port/api/v1/');
+}
+
+/// Serve um arquivo estático com Content-Type correto e cache headers
+Future<Response> _serveStaticFile(String filePath, Request request) async {
+  final file = File(filePath);
+  if (!file.existsSync()) {
+    print('Aviso: Arquivo estático não encontrado: $filePath');
+    return Response.notFound('Arquivo não encontrado');
+  }
+
+  final ext = filePath.split('.').last.toLowerCase();
+  final contentType = _mimeType(ext);
+
+  // Cache longo para assets imutáveis, curto para HTML
+  final cacheControl = (ext == 'html')
+      ? 'no-cache'
+      : 'public, max-age=31536000, immutable';
+
+  return Response.ok(
+    file.openRead(),
+    headers: {
+      'content-type': contentType,
+      'cache-control': cacheControl,
+      'Access-Control-Allow-Origin': '*',
+    },
+  );
+}
+
+/// Retorna o MIME type correto para extensões de arquivos web
+String _mimeType(String ext) {
+  switch (ext) {
+    case 'html': return 'text/html; charset=utf-8';
+    case 'css': return 'text/css; charset=utf-8';
+    case 'js': return 'application/javascript; charset=utf-8';
+    case 'mjs': return 'application/javascript; charset=utf-8';
+    case 'json': return 'application/json; charset=utf-8';
+    case 'png': return 'image/png';
+    case 'jpg': case 'jpeg': return 'image/jpeg';
+    case 'gif': return 'image/gif';
+    case 'svg': return 'image/svg+xml';
+    case 'webp': return 'image/webp';
+    case 'ico': return 'image/x-icon';
+    case 'wasm': return 'application/wasm';
+    case 'woff': return 'font/woff';
+    case 'woff2': return 'font/woff2';
+    case 'ttf': return 'font/ttf';
+    case 'otf': return 'font/otf';
+    case 'map': return 'application/json';
+    default: return 'application/octet-stream';
+  }
 }
 
 /// Middleware CORS flexível para desenvolvimento e produção

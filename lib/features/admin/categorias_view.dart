@@ -97,9 +97,12 @@ class _CategoriasViewState extends State<CategoriasView> {
                         validator: (val) => val == null || val.trim().isEmpty ? 'Insira o nome.' : null,
                       ),
                       const SizedBox(height: 16),
-                      TextFormField(
-                        controller: iconeController,
-                        decoration: const InputDecoration(labelText: 'Ícone (Ex: restaurant, hotel)'),
+                      // ─── Seletor Visual de Ícone ───────────────────
+                      _IconPickerField(
+                        currentValue: iconeController.text,
+                        onChanged: (val) => setModalState(() {
+                          iconeController.text = val;
+                        }),
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
@@ -352,9 +355,18 @@ class _CategoriasViewState extends State<CategoriasView> {
                         : null;
                     return ListTile(
                       contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      leading: Icon(
-                        item.icone.isNotEmpty ? Icons.category : Icons.category_outlined,
-                        color: AppTheme.primaryTeal,
+                      leading: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryTeal.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(
+                          _kAvailableIcons[item.icone]?.icon ?? Icons.category_outlined,
+                          color: AppTheme.primaryTeal,
+                          size: 22,
+                        ),
                       ),
                       title: Text(item.nome, style: TextStyle(fontWeight: FontWeight.bold, color: primaryColor)),
                       subtitle: Text(
@@ -397,6 +409,336 @@ class _CategoriasViewState extends State<CategoriasView> {
             ),
           ),
       ],
+    );
+  }
+}
+
+// ─── Mapa de ícones disponíveis para categorias ─────────────────
+// Chave: valor salvo no backend (string), Valor: {icon, label}
+const Map<String, _IconOption> _kAvailableIcons = {
+  'beach_access': _IconOption(Icons.beach_access, 'Praia'),
+  'pool': _IconOption(Icons.pool, 'Piscina / Lagoa'),
+  'waves': _IconOption(Icons.waves, 'Ondas / Mar'),
+  'water_drop': _IconOption(Icons.water_drop, 'Água'),
+  'waterfall_chart': _IconOption(Icons.waterfall_chart, 'Cachoeira'),
+  'hot_tub': _IconOption(Icons.hot_tub, 'Termas'),
+  'landscape': _IconOption(Icons.landscape, 'Montanha'),
+  'forest': _IconOption(Icons.forest, 'Floresta'),
+  'park': _IconOption(Icons.park, 'Parque'),
+  'nature': _IconOption(Icons.nature, 'Natureza'),
+  'nature_people': _IconOption(Icons.nature_people, 'Ecoturismo'),
+  'hiking': _IconOption(Icons.hiking, 'Trilha'),
+  'terrain': _IconOption(Icons.terrain, 'Terreno'),
+  'wb_sunny': _IconOption(Icons.wb_sunny, 'Sol'),
+  'spa': _IconOption(Icons.spa, 'Spa'),
+  'restaurant': _IconOption(Icons.restaurant, 'Restaurante'),
+  'local_cafe': _IconOption(Icons.local_cafe, 'Café'),
+  'local_bar': _IconOption(Icons.local_bar, 'Bar'),
+  'fastfood': _IconOption(Icons.fastfood, 'Fast Food'),
+  'bakery_dining': _IconOption(Icons.bakery_dining, 'Padaria'),
+  'icecream': _IconOption(Icons.icecream, 'Sorveteria'),
+  'local_pizza': _IconOption(Icons.local_pizza, 'Pizzaria'),
+  'hotel': _IconOption(Icons.hotel, 'Hotel'),
+  'cottage': _IconOption(Icons.cottage, 'Chalé / Pousada'),
+  'house': _IconOption(Icons.house, 'Casa'),
+  'storefront': _IconOption(Icons.storefront, 'Loja'),
+  'shopping_bag': _IconOption(Icons.shopping_bag, 'Compras'),
+  'local_gas_station': _IconOption(Icons.local_gas_station, 'Posto'),
+  'local_hospital': _IconOption(Icons.local_hospital, 'Hospital'),
+  'local_pharmacy': _IconOption(Icons.local_pharmacy, 'Farmácia'),
+  'directions_boat': _IconOption(Icons.directions_boat, 'Barco'),
+  'pedal_bike': _IconOption(Icons.pedal_bike, 'Bicicleta'),
+  'surfing': _IconOption(Icons.surfing, 'Surf'),
+  'kayaking': _IconOption(Icons.kayaking, 'Caiaque'),
+  'sports_esports': _IconOption(Icons.sports_esports, 'Games'),
+  'music_note': _IconOption(Icons.music_note, 'Música'),
+  'theater_comedy': _IconOption(Icons.theater_comedy, 'Teatro'),
+  'camera_alt': _IconOption(Icons.camera_alt, 'Foto'),
+  'explore': _IconOption(Icons.explore, 'Explorar'),
+  'place': _IconOption(Icons.place, 'Local'),
+  'map': _IconOption(Icons.map, 'Mapa'),
+  'pets': _IconOption(Icons.pets, 'Animais'),
+  'child_care': _IconOption(Icons.child_care, 'Crianças'),
+  'accessibility': _IconOption(Icons.accessibility, 'Acessibilidade'),
+  'star': _IconOption(Icons.star, 'Destaque'),
+  'favorite': _IconOption(Icons.favorite, 'Favorito'),
+  'category': _IconOption(Icons.category, 'Categoria'),
+  'local_activity': _IconOption(Icons.local_activity, 'Atividade'),
+  'attractions': _IconOption(Icons.attractions, 'Atração'),
+  'festival': _IconOption(Icons.festival, 'Festival'),
+  'nightlife': _IconOption(Icons.nightlife, 'Vida Noturna'),
+  'church': _IconOption(Icons.church, 'Igreja'),
+  'museum': _IconOption(Icons.museum, 'Museu'),
+  'stadium': _IconOption(Icons.stadium, 'Estádio'),
+};
+
+class _IconOption {
+  final IconData icon;
+  final String label;
+  const _IconOption(this.icon, this.label);
+}
+
+// ─── Widget de Seleção de Ícone ──────────────────────────────────
+class _IconPickerField extends StatelessWidget {
+  final String currentValue;
+  final ValueChanged<String> onChanged;
+
+  const _IconPickerField({
+    required this.currentValue,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final currentOption = _kAvailableIcons[currentValue];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Ícone da Categoria',
+          style: TextStyle(
+            fontSize: 12,
+            color: isDark ? Colors.white60 : Colors.black54,
+          ),
+        ),
+        const SizedBox(height: 8),
+        InkWell(
+          onTap: () => _showIconPickerDialog(context),
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryTeal.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(
+                    currentOption?.icon ?? Icons.add_circle_outline,
+                    color: AppTheme.primaryTeal,
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        currentOption?.label ?? 'Nenhum ícone selecionado',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                          color: isDark ? Colors.white : Colors.black87,
+                        ),
+                      ),
+                      if (currentValue.isNotEmpty)
+                        Text(
+                          currentValue,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: isDark ? Colors.white38 : Colors.black38,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_drop_down,
+                  color: isDark ? Colors.white38 : Colors.black38,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _showIconPickerDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => _IconPickerDialog(
+        currentValue: currentValue,
+        onSelected: (val) {
+          onChanged(val);
+          Navigator.pop(ctx);
+        },
+      ),
+    );
+  }
+}
+
+// ─── Dialog com Grid de Ícones ───────────────────────────────────
+class _IconPickerDialog extends StatefulWidget {
+  final String currentValue;
+  final ValueChanged<String> onSelected;
+
+  const _IconPickerDialog({
+    required this.currentValue,
+    required this.onSelected,
+  });
+
+  @override
+  State<_IconPickerDialog> createState() => _IconPickerDialogState();
+}
+
+class _IconPickerDialogState extends State<_IconPickerDialog> {
+  String _searchQuery = '';
+
+  List<MapEntry<String, _IconOption>> get _filteredIcons {
+    if (_searchQuery.isEmpty) return _kAvailableIcons.entries.toList();
+    final q = _searchQuery.toLowerCase();
+    return _kAvailableIcons.entries.where((e) {
+      return e.key.contains(q) || e.value.label.toLowerCase().contains(q);
+    }).toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Dialog(
+      backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 480, maxHeight: 520),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Header
+            Row(
+              children: [
+                Icon(Icons.emoji_symbols, color: AppTheme.primaryTeal, size: 22),
+                const SizedBox(width: 10),
+                Text(
+                  'Escolha um Ícone',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: const Icon(Icons.close, size: 20),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Busca
+            TextField(
+              decoration: InputDecoration(
+                hintText: 'Buscar ícone...',
+                prefixIcon: const Icon(Icons.search, size: 20),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                isDense: true,
+              ),
+              onChanged: (val) => setState(() => _searchQuery = val),
+            ),
+            const SizedBox(height: 14),
+
+            // Grid de Ícones
+            Expanded(
+              child: _filteredIcons.isEmpty
+                  ? Center(
+                      child: Text(
+                        'Nenhum ícone encontrado.',
+                        style: TextStyle(color: isDark ? Colors.white54 : Colors.black54),
+                      ),
+                    )
+                  : GridView.builder(
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 5,
+                        mainAxisSpacing: 8,
+                        crossAxisSpacing: 8,
+                        childAspectRatio: 0.85,
+                      ),
+                      itemCount: _filteredIcons.length,
+                      itemBuilder: (context, index) {
+                        final entry = _filteredIcons[index];
+                        final isSelected = entry.key == widget.currentValue;
+
+                        return Tooltip(
+                          message: entry.value.label,
+                          waitDuration: const Duration(milliseconds: 300),
+                          child: InkWell(
+                            onTap: () => widget.onSelected(entry.key),
+                            borderRadius: BorderRadius.circular(12),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? AppTheme.primaryTeal.withOpacity(0.15)
+                                    : isDark
+                                        ? const Color(0xFF0F172A)
+                                        : const Color(0xFFF1F5F9),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? AppTheme.primaryTeal
+                                      : Colors.transparent,
+                                  width: 2,
+                                ),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    entry.value.icon,
+                                    size: 24,
+                                    color: isSelected
+                                        ? AppTheme.primaryTeal
+                                        : isDark
+                                            ? Colors.white54
+                                            : Colors.black54,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    entry.value.label,
+                                    style: TextStyle(
+                                      fontSize: 9,
+                                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                      color: isSelected
+                                          ? AppTheme.primaryTeal
+                                          : isDark
+                                              ? Colors.white38
+                                              : Colors.black45,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

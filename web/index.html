@@ -99,10 +99,24 @@
   </div>
 
   <script>
-    // Remove o splash screen quando a aplicação Flutter for inicializada
+    // Gerenciamento do bootstrap do Flutter Web com remoção do Loader
     window.addEventListener('load', function() {
-      // O script do flutter_bootstrap.js irá gerenciar o carregamento. 
-      // Esta lógica garante que ocultamos o loader após o Flutter inicializar.
+      var loading = document.getElementById('loading');
+      _flutter.loader.load({
+        onEntrypointLoaded: function(engineInitializer) {
+          engineInitializer.initializeEngine().then(function(appRunner) {
+            appRunner.runApp().then(function() {
+              // Remove o splash screen/spinner quando o Flutter renderizar o primeiro frame
+              if (loading) {
+                loading.style.opacity = '0';
+                setTimeout(function() {
+                  loading.remove();
+                }, 400); // transição suave de fade-out
+              }
+            });
+          });
+        }
+      });
     });
   </script>
   <script src="flutter_bootstrap.js" async></script>

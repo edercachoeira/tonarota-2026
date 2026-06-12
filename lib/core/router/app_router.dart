@@ -28,7 +28,8 @@ class AppRouter {
     refreshListenable: authProvider,
     redirect: (BuildContext context, GoRouterState state) {
       final isAuthenticated = authProvider.isAuthenticated;
-      final isLoggingIn = state.matchedLocation == '/login';
+      // Tanto '/' quanto '/login' são telas de login (a raiz agora mostra LoginView)
+      final isLoginScreen = state.matchedLocation == '/login' || state.matchedLocation == '/';
       final isAdminArea = state.matchedLocation.startsWith('/admin');
       final isMerchantArea = state.matchedLocation.startsWith('/merchant') && state.matchedLocation != '/merchant/register';
 
@@ -37,8 +38,8 @@ class AppRouter {
         return '/login';
       }
 
-      // Redireciona para o dashboard correto se logado e tentar acessar o /login
-      if (isAuthenticated && isLoggingIn) {
+      // Redireciona para o dashboard correto se logado e estiver na tela de login
+      if (isAuthenticated && isLoginScreen) {
         final role = authProvider.currentUser?.role;
         if (role == 'gestor') {
           return '/admin';
@@ -64,7 +65,7 @@ class AppRouter {
     routes: [
       GoRoute(
         path: '/',
-        builder: (context, state) => const HomeView(),
+        builder: (context, state) => const LoginView(),
       ),
       GoRoute(
         path: '/login',

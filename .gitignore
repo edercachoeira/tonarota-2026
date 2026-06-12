@@ -51,4 +51,11 @@ app.*.map.json
 # Local Obsidian Vault
 /vault/
 
+# Server artifacts
+server/bin/*.exe
+server/uploads/
+server/bin/service.log
+
+# Temporary screenshots
+/flutter_01.png
 
