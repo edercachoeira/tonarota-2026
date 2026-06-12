@@ -206,7 +206,7 @@ class EstabelecimentoService {
       plano: row[12] as String,
       status: row[13] as String,
       horarios: parsedHorarios,
-      notaMedia: (row[15] as num?)?.toDouble() ?? 0.0,
+      notaMedia: double.tryParse(row[15]?.toString() ?? '') ?? 0.0,
       totalAvaliacoes: row[16] as int? ?? 0,
       totalVisualizacoes: row[17] as int? ?? 0,
       createdAt: row[18] as DateTime,
