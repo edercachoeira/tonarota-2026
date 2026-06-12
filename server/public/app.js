@@ -230,8 +230,11 @@ function setupSearch() {
 }
 
 // ─── Bootstrap ─────────────────────────────────────────────────────
-async function init() {
-  renderSkeletons();
+// ─── Bootstrap ─────────────────────────────────────────────────────
+async function fetchDataAndRender(showSkeletons = false) {
+  if (showSkeletons) {
+    renderSkeletons();
+  }
 
   // Fetch data in parallel
   const [categorias, balnearios, estabelecimentos] = await Promise.all([
@@ -240,15 +243,15 @@ async function init() {
     apiFetch('/estabelecimentos'),
   ]);
 
+  if (!categorias && !balnearios) return;
+
   // Populate state
   allCategorias = categorias || [];
   allBalnearios = (balnearios || []).map(b => {
-    // Tenta usar categoria_id direto (caso exista no modelo futuro)
     let cat = null;
     if (b.categoria_id) {
       cat = allCategorias.find(c => c.id === b.categoria_id);
     }
-    // Se não encontrou por ID, infere a partir do nome/descrição
     if (!cat) {
       cat = inferCategory(b, allCategorias);
     }
@@ -260,15 +263,33 @@ async function init() {
   });
 
   // Update stats
-  updateStats();
-  if (statEstabelecimentos && estabelecimentos) {
-    animateNumber(statEstabelecimentos, estabelecimentos.length);
+  if (showSkeletons) {
+    updateStats();
+    if (statEstabelecimentos && estabelecimentos) {
+      animateNumber(statEstabelecimentos, estabelecimentos.length);
+    }
+  } else {
+    // Silent update sem animações
+    if (statBalnearios) statBalnearios.textContent = allBalnearios.length;
+    if (statCategorias) statCategorias.textContent = allCategorias.length;
+    if (statEstabelecimentos && estabelecimentos) {
+      statEstabelecimentos.textContent = estabelecimentos.length;
+    }
   }
 
   // Render UI
   renderChips();
   renderCards();
+}
+
+async function init() {
+  await fetchDataAndRender(true);
   setupSearch();
+
+  // Polling em tempo real a cada 5 segundos
+  setInterval(() => {
+    fetchDataAndRender(false);
+  }, 5000);
 }
 
 document.addEventListener('DOMContentLoaded', init);
