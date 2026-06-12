@@ -281,70 +281,73 @@ class AdminLayout extends StatelessWidget {
               ],
             ),
           ),
-        ),
-        
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Text(
-            'MENU PRINCIPAL',
-            style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: secondaryColor.withOpacity(0.6), letterSpacing: 1.5),
-          ),
-        ),
-        const SizedBox(height: 12),
-        
-        // Links de Navegação
-        _AnimatedSidebarItem(
-          icon: Icons.grid_view_rounded,
-          label: 'Dashboard',
-          route: '/admin/dashboard',
-          isSelected: currentRoute == '/admin/dashboard',
-        ),
-        _AnimatedSidebarItem(
-          icon: Icons.map_rounded,
-          label: 'Balneários',
-          route: '/admin/balnearios',
-          isSelected: currentRoute == '/admin/balnearios',
-        ),
-        _AnimatedSidebarItem(
-          icon: Icons.category_rounded,
-          label: 'Categorias',
-          route: '/admin/categorias',
-          isSelected: currentRoute == '/admin/categorias',
-        ),
-        _AnimatedSidebarItem(
-          icon: Icons.storefront_rounded,
-          label: 'Estabelecimentos',
-          route: '/admin/estabelecimentos',
-          isSelected: currentRoute == '/admin/estabelecimentos',
-        ),
+        ),        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Text(
+                    'MENU PRINCIPAL',
+                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: secondaryColor.withOpacity(0.6), letterSpacing: 1.5),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                
+                // Links de Navegação
+                _AnimatedSidebarItem(
+                  icon: Icons.grid_view_rounded,
+                  label: 'Dashboard',
+                  route: '/admin/dashboard',
+                  isSelected: currentRoute == '/admin/dashboard',
+                ),
+                _AnimatedSidebarItem(
+                  icon: Icons.map_rounded,
+                  label: 'Balneários',
+                  route: '/admin/balnearios',
+                  isSelected: currentRoute == '/admin/balnearios',
+                ),
+                _AnimatedSidebarItem(
+                  icon: Icons.category_rounded,
+                  label: 'Categorias',
+                  route: '/admin/categorias',
+                  isSelected: currentRoute == '/admin/categorias',
+                ),
+                _AnimatedSidebarItem(
+                  icon: Icons.storefront_rounded,
+                  label: 'Estabelecimentos',
+                  route: '/admin/estabelecimentos',
+                  isSelected: currentRoute == '/admin/estabelecimentos',
+                ),
 
-
-        if (auth.currentUser?.role == 'gestor') ...[
-          const SizedBox(height: 24),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Text(
-              'ADMINISTRAÇÃO',
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: secondaryColor.withOpacity(0.6), letterSpacing: 1.5),
+                if (auth.currentUser?.role == 'gestor') ...[
+                  const SizedBox(height: 24),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Text(
+                      'ADMINISTRAÇÃO',
+                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: secondaryColor.withOpacity(0.6), letterSpacing: 1.5),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  _AnimatedSidebarItem(
+                    icon: Icons.shield_rounded,
+                    label: 'Gestores',
+                    route: '/admin/gestores',
+                    isSelected: currentRoute == '/admin/gestores',
+                  ),
+                  _AnimatedSidebarItem(
+                    icon: Icons.history_rounded,
+                    label: 'Auditoria',
+                    route: '/admin/auditoria',
+                    isSelected: currentRoute == '/admin/auditoria',
+                  ),
+                ],
+              ],
             ),
           ),
-          const SizedBox(height: 12),
-          _AnimatedSidebarItem(
-            icon: Icons.shield_rounded,
-            label: 'Gestores',
-            route: '/admin/gestores',
-            isSelected: currentRoute == '/admin/gestores',
-          ),
-          _AnimatedSidebarItem(
-            icon: Icons.history_rounded,
-            label: 'Auditoria',
-            route: '/admin/auditoria',
-            isSelected: currentRoute == '/admin/auditoria',
-          ),
-        ],
-
-        const Spacer(),
-        
+        ),
         // Rodapé
         Container(
           padding: const EdgeInsets.all(24),

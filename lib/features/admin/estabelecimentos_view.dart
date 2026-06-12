@@ -575,7 +575,6 @@ class _EstabelecimentosViewState extends State<EstabelecimentosView> {
           ],
         ),
         const SizedBox(height: 24),
-
         // Barra de Filtros
         Card(
           elevation: 0,
@@ -585,87 +584,120 @@ class _EstabelecimentosViewState extends State<EstabelecimentosView> {
           ),
           child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Buscar por nome fantasia ou CNPJ/CPF...',
-                      prefixIcon: const Icon(Icons.search, color: AppTheme.primaryTeal),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final useVerticalLayout = constraints.maxWidth < 850;
+
+                final searchField = TextField(
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Buscar por nome fantasia ou CNPJ/CPF...',
+                    prefixIcon: const Icon(Icons.search, color: AppTheme.primaryTeal),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    onChanged: (val) => setState(() {}),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  flex: 1,
-                  child: DropdownButtonFormField<String>(
-                    value: _selectedBalnearioId,
-                    decoration: InputDecoration(
-                      labelText: 'Balneário',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  onChanged: (val) => setState(() {}),
+                );
+
+                final balnearioDropdown = DropdownButtonFormField<String>(
+                  value: _selectedBalnearioId,
+                  decoration: InputDecoration(
+                    labelText: 'Balneário',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    items: [
-                      const DropdownMenuItem(value: 'Todos', child: Text('Todos')),
-                      ..._balnearios.map((b) => DropdownMenuItem(value: b.id, child: Text(b.nome))),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  ),
+                  items: [
+                    const DropdownMenuItem(value: 'Todos', child: Text('Todos')),
+                    ..._balnearios.map((b) => DropdownMenuItem(value: b.id, child: Text(b.nome))),
+                  ],
+                  onChanged: (val) => setState(() => _selectedBalnearioId = val ?? 'Todos'),
+                );
+
+                final planoDropdown = DropdownButtonFormField<String>(
+                  value: _selectedPlano,
+                  decoration: InputDecoration(
+                    labelText: 'Plano',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 'Todos', child: Text('Todos')),
+                    DropdownMenuItem(value: 'gratuito', child: Text('Gratuito')),
+                    DropdownMenuItem(value: 'premium', child: Text('Premium')),
+                  ],
+                  onChanged: (val) => setState(() => _selectedPlano = val ?? 'Todos'),
+                );
+
+                final statusDropdown = DropdownButtonFormField<String>(
+                  value: _selectedStatus,
+                  decoration: InputDecoration(
+                    labelText: 'Status',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  ),
+                  items: const [
+                    DropdownMenuItem(value: 'Todos', child: Text('Todos')),
+                    DropdownMenuItem(value: 'pendente', child: Text('Pendente')),
+                    DropdownMenuItem(value: 'ativo', child: Text('Ativo')),
+                    DropdownMenuItem(value: 'suspenso', child: Text('Suspenso')),
+                  ],
+                  onChanged: (val) => setState(() => _selectedStatus = val ?? 'Todos'),
+                );
+
+                if (useVerticalLayout) {
+                  return Column(
+                    children: [
+                      searchField,
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(child: balnearioDropdown),
+                          const SizedBox(width: 12),
+                          Expanded(child: planoDropdown),
+                          const SizedBox(width: 12),
+                          Expanded(child: statusDropdown),
+                        ],
+                      ),
                     ],
-                    onChanged: (val) => setState(() => _selectedBalnearioId = val ?? 'Todos'),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  flex: 1,
-                  child: DropdownButtonFormField<String>(
-                    value: _selectedPlano,
-                    decoration: InputDecoration(
-                      labelText: 'Plano',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                  );
+                }
+
+                return Row(
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: searchField,
                     ),
-                    items: const [
-                      DropdownMenuItem(value: 'Todos', child: Text('Todos')),
-                      DropdownMenuItem(value: 'gratuito', child: Text('Gratuito')),
-                      DropdownMenuItem(value: 'premium', child: Text('Premium')),
-                    ],
-                    onChanged: (val) => setState(() => _selectedPlano = val ?? 'Todos'),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  flex: 1,
-                  child: DropdownButtonFormField<String>(
-                    value: _selectedStatus,
-                    decoration: InputDecoration(
-                      labelText: 'Status',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      flex: 1,
+                      child: balnearioDropdown,
                     ),
-                    items: const [
-                      DropdownMenuItem(value: 'Todos', child: Text('Todos')),
-                      DropdownMenuItem(value: 'pendente', child: Text('Pendente')),
-                      DropdownMenuItem(value: 'ativo', child: Text('Ativo')),
-                      DropdownMenuItem(value: 'suspenso', child: Text('Suspenso')),
-                    ],
-                    onChanged: (val) => setState(() => _selectedStatus = val ?? 'Todos'),
-                  ),
-                ),
-              ],
+                    const SizedBox(width: 16),
+                    Expanded(
+                      flex: 1,
+                      child: planoDropdown,
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      flex: 1,
+                      child: statusDropdown,
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ),
+
         const SizedBox(height: 24),
 
         // Listagem
