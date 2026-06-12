@@ -13,6 +13,8 @@ import '../lib/routes/categoria_routes.dart';
 import '../lib/routes/estabelecimento_routes.dart';
 import '../lib/routes/auditoria_routes.dart';
 import '../lib/routes/produto_routes.dart';
+import '../lib/routes/metrica_routes.dart';
+import '../lib/routes/avaliacao_routes.dart';
 
 void main(List<String> args) async {
   // Carrega variáveis de ambiente se o arquivo .env existir
@@ -120,6 +122,8 @@ void main(List<String> args) async {
   router.mount('/api/v1/estabelecimentos', EstabelecimentoRoutes().router.call);
   router.mount('/api/v1/auditoria', AuditoriaRoutes().router.call);
   router.mount('/api/v1/produtos', ProdutoRoutes().router.call);
+  router.mount('/api/v1/metricas', MetricaRoutes().router.call);
+  router.mount('/api/v1/avaliacoes', AvaliacaoRoutes().router.call);
 
   // ─── STATIC FILE SERVING ───────────────────────────────────────
   // Obtém o diretório do executável ou script em execução

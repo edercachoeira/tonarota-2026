@@ -251,140 +251,158 @@ class AdminLayout extends StatelessWidget {
     Color borderColor,
     bool isDark,
   ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Cabeçalho da Sidebar
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-          child: Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: AppTheme.primaryTeal.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(14),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: constraints.maxHeight,
             ),
-            child: const Row(
-              children: [
-                Text(
-                  '🏝️',
-                  style: TextStyle(fontSize: 22),
-                ),
-                SizedBox(width: 8),
-                Text(
-                  'Tô Na Rota',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.primaryTeal,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),        Expanded(
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Text(
-                    'MENU PRINCIPAL',
-                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: secondaryColor.withOpacity(0.6), letterSpacing: 1.5),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                
-                // Links de Navegação
-                _AnimatedSidebarItem(
-                  icon: Icons.grid_view_rounded,
-                  label: 'Dashboard',
-                  route: '/admin/dashboard',
-                  isSelected: currentRoute == '/admin/dashboard',
-                ),
-                _AnimatedSidebarItem(
-                  icon: Icons.map_rounded,
-                  label: 'Balneários',
-                  route: '/admin/balnearios',
-                  isSelected: currentRoute == '/admin/balnearios',
-                ),
-                _AnimatedSidebarItem(
-                  icon: Icons.category_rounded,
-                  label: 'Categorias',
-                  route: '/admin/categorias',
-                  isSelected: currentRoute == '/admin/categorias',
-                ),
-                _AnimatedSidebarItem(
-                  icon: Icons.storefront_rounded,
-                  label: 'Estabelecimentos',
-                  route: '/admin/estabelecimentos',
-                  isSelected: currentRoute == '/admin/estabelecimentos',
-                ),
-
-                if (auth.currentUser?.role == 'gestor') ...[
-                  const SizedBox(height: 24),
+            child: IntrinsicHeight(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Cabeçalho da Sidebar
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Text(
-                      'ADMINISTRAÇÃO',
-                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: secondaryColor.withOpacity(0.6), letterSpacing: 1.5),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryTeal.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: const Row(
+                        children: [
+                          Text(
+                            '🏝️',
+                            style: TextStyle(fontSize: 22),
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'Tô Na Rota',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.primaryTeal,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  _AnimatedSidebarItem(
-                    icon: Icons.shield_rounded,
-                    label: 'Gestores',
-                    route: '/admin/gestores',
-                    isSelected: currentRoute == '/admin/gestores',
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24),
+                          child: Text(
+                            'MENU PRINCIPAL',
+                            style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: secondaryColor.withOpacity(0.6), letterSpacing: 1.5),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        
+                        // Links de Navegação
+                        _AnimatedSidebarItem(
+                          icon: Icons.grid_view_rounded,
+                          label: 'Dashboard',
+                          route: '/admin/dashboard',
+                          isSelected: currentRoute == '/admin/dashboard',
+                        ),
+                        _AnimatedSidebarItem(
+                          icon: Icons.map_rounded,
+                          label: 'Balneários',
+                          route: '/admin/balnearios',
+                          isSelected: currentRoute == '/admin/balnearios',
+                        ),
+                        _AnimatedSidebarItem(
+                          icon: Icons.category_rounded,
+                          label: 'Categorias',
+                          route: '/admin/categorias',
+                          isSelected: currentRoute == '/admin/categorias',
+                        ),
+                        _AnimatedSidebarItem(
+                          icon: Icons.storefront_rounded,
+                          label: 'Estabelecimentos',
+                          route: '/admin/estabelecimentos',
+                          isSelected: currentRoute == '/admin/estabelecimentos',
+                        ),
+
+                        if (auth.currentUser?.role == 'gestor') ...[
+                          const SizedBox(height: 24),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            child: Text(
+                              'ADMINISTRAÇÃO',
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: secondaryColor.withOpacity(0.6), letterSpacing: 1.5),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          _AnimatedSidebarItem(
+                            icon: Icons.shield_rounded,
+                            label: 'Gestores',
+                            route: '/admin/gestores',
+                            isSelected: currentRoute == '/admin/gestores',
+                          ),
+                          _AnimatedSidebarItem(
+                            icon: Icons.history_rounded,
+                            label: 'Auditoria',
+                            route: '/admin/auditoria',
+                            isSelected: currentRoute == '/admin/auditoria',
+                          ),
+                          _AnimatedSidebarItem(
+                            icon: Icons.rate_review_rounded,
+                            label: 'Avaliações',
+                            route: '/admin/avaliacoes',
+                            isSelected: currentRoute == '/admin/avaliacoes',
+                          ),
+                        ],
+                      ],
+                    ),
                   ),
-                  _AnimatedSidebarItem(
-                    icon: Icons.history_rounded,
-                    label: 'Auditoria',
-                    route: '/admin/auditoria',
-                    isSelected: currentRoute == '/admin/auditoria',
+                  // Rodapé
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      border: Border(top: BorderSide(color: borderColor.withOpacity(0.5))),
+                    ),
+                    child: Column(
+                      children: [
+                        _AnimatedSidebarItem(
+                          icon: Icons.account_circle_rounded,
+                          label: 'Minha Conta',
+                          route: '/admin/perfil',
+                          isSelected: currentRoute == '/admin/perfil',
+                          isCompact: true,
+                        ),
+                        const SizedBox(height: 4),
+                        _AnimatedSidebarItem(
+                          icon: Icons.public_rounded,
+                          label: 'Ver Site',
+                          route: '/',
+                          isSelected: false,
+                          isCompact: true,
+                        ),
+                        const SizedBox(height: 4),
+                        _AnimatedSidebarItem(
+                          icon: Icons.logout_rounded,
+                          label: 'Sair',
+                          route: '',
+                          isSelected: false,
+                          isCompact: true,
+                          isDestructive: true,
+                          onTapOverride: () => auth.logout(),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
-              ],
+              ),
             ),
           ),
-        ),
-        // Rodapé
-        Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            border: Border(top: BorderSide(color: borderColor.withOpacity(0.5))),
-          ),
-          child: Column(
-            children: [
-              _AnimatedSidebarItem(
-                icon: Icons.account_circle_rounded,
-                label: 'Minha Conta',
-                route: '/admin/perfil',
-                isSelected: currentRoute == '/admin/perfil',
-                isCompact: true,
-              ),
-              const SizedBox(height: 4),
-              _AnimatedSidebarItem(
-                icon: Icons.public_rounded,
-                label: 'Ver Site',
-                route: '/',
-                isSelected: false,
-                isCompact: true,
-              ),
-              const SizedBox(height: 4),
-              _AnimatedSidebarItem(
-                icon: Icons.logout_rounded,
-                label: 'Sair',
-                route: '',
-                isSelected: false,
-                isCompact: true,
-                isDestructive: true,
-                onTapOverride: () => auth.logout(),
-              ),
-            ],
-          ),
-        ),
-      ],
+        );
+      },
     );
   }
 }

@@ -17,6 +17,8 @@ class Estabelecimento {
   final double notaMedia;
   final int totalAvaliacoes;
   final int totalVisualizacoes;
+  final int totalCliquesWhatsapp;
+  final int totalCliquesInstagram;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -39,6 +41,8 @@ class Estabelecimento {
     required this.notaMedia,
     required this.totalAvaliacoes,
     required this.totalVisualizacoes,
+    this.totalCliquesWhatsapp = 0,
+    this.totalCliquesInstagram = 0,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -63,6 +67,8 @@ class Estabelecimento {
       notaMedia: (json['nota_media'] as num?)?.toDouble() ?? 0.0,
       totalAvaliacoes: json['total_avaliacoes'] as int? ?? 0,
       totalVisualizacoes: json['total_visualizacoes'] as int? ?? 0,
+      totalCliquesWhatsapp: json['total_cliques_whatsapp'] as int? ?? 0,
+      totalCliquesInstagram: json['total_cliques_instagram'] as int? ?? 0,
       createdAt: json['created_at'] != null 
           ? DateTime.parse(json['created_at'] as String)
           : DateTime.now(),
@@ -92,6 +98,8 @@ class Estabelecimento {
       'nota_media': notaMedia,
       'total_avaliacoes': totalAvaliacoes,
       'total_visualizacoes': totalVisualizacoes,
+      'total_cliques_whatsapp': totalCliquesWhatsapp,
+      'total_cliques_instagram': totalCliquesInstagram,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
     };
